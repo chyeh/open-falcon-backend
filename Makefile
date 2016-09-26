@@ -5,9 +5,9 @@ TARGET = open-falcon
 
 VERSION := $(shell cat VERSION)
 
-all: trash $(CMD) $(TARGET)
+all: $(CMD) $(TARGET)
 
-$(CMD):
+$(CMD): trash
 	go build -o bin/$@/falcon-$@ ./modules/$@
 
 $(TARGET): $(TARGET_SOURCE)

@@ -53,6 +53,9 @@ clean:
 	@rm -rf open-falcon-v$(VERSION).tar.gz
 
 trash:
+ifeq (, $(shell which trash))
+	$(error "trash not found, try 'go get github.com/rancher/trash'")
+endif
 	trash -k -cache package_cache_tmp
 
 .PHONY: trash clean all aggregator graph hbs judge nodata query sender task transfer fe

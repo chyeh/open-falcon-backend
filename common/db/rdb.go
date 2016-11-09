@@ -6,6 +6,16 @@ import (
 	"log"
 )
 
+// Configuration of database
+type DbConfig struct {
+	Dsn string
+	MaxIdle int
+}
+
+func (config *DbConfig) String() string {
+	return fmt.Sprintf("DSN: [%s]. Max Idle: [%d]", config.Dsn, config.MaxIdle)
+}
+
 // The main functions of this file is to gives IoC(Inverse of Control) of database(RDB) objects.
 //
 // For exception handling, all callback method should use panic() or log.Panicf() to release the error object.
@@ -60,6 +70,17 @@ type TxCallback interface {
 type TxCallbackFunc func(*sql.Tx)
 func (callbackFunc TxCallbackFunc) InTx(tx *sql.Tx) {
 	callbackFunc(tx)
+}
+
+// BuildTxForSqls builds function for exeuction of multiple SQLs
+func BuildTxForSqls(queries... string) TxCallback {
+	return TxCallbackFunc(func(tx *sql.Tx) {
+		for _, v := range queries {
+			if _, err := tx.Exec(v); err != nil {
+				panic(err)
+			}
+		}
+	})
 }
 
 // Executes callbacks in transaction if the boot callback has true value
@@ -442,6 +463,11 @@ func (dbController *DbController) InTxForIf(ifCallbacks ExecuteIfByTx) {
 	}
 
 	dbController.InTx(txFunc)
+}
+
+// Executes in transaction
+func (dbController *DbController) ExecQueriesInTx(queries... string) {
+	dbController.InTx(BuildTxForSqls(queries...))
 }
 
 // Releases the database object under this object

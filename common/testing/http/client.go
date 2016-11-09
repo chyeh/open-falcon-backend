@@ -13,6 +13,8 @@ import (
 // Slint with checker
 type CheckSlint struct {
 	Slint *sling.Sling
+	LastResponse *http.Response
+
 	checker *checker.C
 }
 
@@ -33,13 +35,28 @@ func (self *CheckSlint) Request() *http.Request {
 
 // Gets the response for current request
 func (self *CheckSlint) GetResponse() *http.Response {
+	if self.LastResponse != nil {
+		return self.LastResponse
+	}
+
 	c := self.checker
 	client := &http.Client{}
 
-	resp, err := client.Do(self.Request())
+	var err error
+	self.LastResponse, err = client.Do(self.Request())
 	c.Assert(err, checker.IsNil)
 
-	return resp
+	return self.LastResponse
+}
+
+// Asserts the existing of paging header
+func (self *CheckSlint) AssertHasPaging() {
+	c := self.checker
+	resp := self.GetResponse()
+
+	c.Assert(resp.Header.Get("page-size"), checker.Matches, "\\d+")
+	c.Assert(resp.Header.Get("page-pos"), checker.Matches, "\\d+")
+	c.Assert(resp.Header.Get("total-count"), checker.Matches, "\\d+")
 }
 
 // Gets body as string
@@ -51,8 +68,14 @@ func (self *CheckSlint) GetStringBody(expectedStatus int) string {
 	resp := self.GetResponse()
 	defer resp.Body.Close()
 
-	c.Assert(resp.StatusCode, checker.Equals, expectedStatus)
+	c.Check(resp.StatusCode, checker.Equals, expectedStatus)
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
+
+	if c.Failed() {
+		c.Logf("Has error. Response: %s. If ioutil.ReadAll() has error: %v", bodyBytes, err)
+		c.FailNow()
+	}
+
 	c.Assert(err, checker.IsNil)
 
 	return string(bodyBytes)

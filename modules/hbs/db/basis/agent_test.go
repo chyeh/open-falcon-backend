@@ -1,12 +1,13 @@
-package db
+package basis
 
 import (
 	"database/sql"
-	. "gopkg.in/check.v1"
 	"github.com/Cepave/open-falcon-backend/modules/hbs/g"
+	"github.com/Cepave/open-falcon-backend/modules/hbs/db"
 	commonDb "github.com/Cepave/open-falcon-backend/common/db"
 	commonModel "github.com/Cepave/open-falcon-backend/common/model"
-	hbstesting "github.com/Cepave/open-falcon-backend/modules/hbs/testing"
+	dbTest "github.com/Cepave/open-falcon-backend/common/testing/db"
+	. "gopkg.in/check.v1"
 )
 
 type TestAgentSuite struct{}
@@ -44,9 +45,7 @@ func (suite *TestAgentSuite) TestUpdateAgent(c *C) {
 }
 
 func assertUpdateAgent(c *C, testCase *testCaseOfUpdateAgent) {
-	dbCtrl := commonDb.NewDbController(DB)
-
-	dbCtrl.QueryForRow(
+	DbFacade.SqlDbCtrl.QueryForRow(
 		commonDb.RowCallbackFunc(func(row *sql.Row) {
 			var ip, agentVersion, pluginVersion string
 
@@ -66,18 +65,14 @@ func assertUpdateAgent(c *C, testCase *testCaseOfUpdateAgent) {
 }
 
 func (s *TestAgentSuite) SetUpSuite(c *C) {
-	(&TestDbSuite{}).SetUpSuite(c)
+	db.DbInit(dbTest.GetDbConfig(c))
 }
 
 func (s *TestAgentSuite) TearDownSuite(c *C) {
-	(&TestDbSuite{}).TearDownSuite(c)
+	db.Release()
 }
 
 func (s *TestAgentSuite) SetUpTest(c *C) {
-	if !hbstesting.HasDbEnvForMysqlOrSkip(c) {
-		return
-	}
-
 	switch c.TestName() {
 	case "TestAgentSuite.TestUpdateAgent":
 		g.SetConfig(&g.GlobalConfig{
@@ -86,11 +81,9 @@ func (s *TestAgentSuite) SetUpTest(c *C) {
 	}
 }
 func (s *TestAgentSuite) TearDownTest(c *C) {
-	dbCtrl := commonDb.NewDbController(DB)
-
 	switch c.TestName() {
 	case "TestAgentSuite.TestUpdateAgent":
 		g.SetConfig(nil)
-		dbCtrl.Exec("DELETE FROM host WHERE hostname = 'test-host-1'")
+		DbFacade.SqlDbCtrl.Exec("DELETE FROM host WHERE hostname = 'test-host-1'")
 	}
 }

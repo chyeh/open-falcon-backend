@@ -1,4 +1,4 @@
-package db
+package nqm
 
 import (
 	"database/sql"
@@ -6,9 +6,10 @@ import (
 	"sort"
 	"time"
 
+	nqmModel "github.com/Cepave/open-falcon-backend/common/model/nqm"
+	dbTest "github.com/Cepave/open-falcon-backend/common/testing/db"
 	commonModel "github.com/Cepave/open-falcon-backend/common/model"
-	"github.com/Cepave/open-falcon-backend/modules/hbs/model"
-	hbstesting "github.com/Cepave/open-falcon-backend/modules/hbs/testing"
+	commonDb "github.com/Cepave/open-falcon-backend/common/db"
 
 	. "gopkg.in/check.v1"
 )
@@ -18,11 +19,11 @@ type TestDbNqmSuite struct{}
 var _ = Suite(&TestDbNqmSuite{})
 
 func (s *TestDbNqmSuite) SetUpSuite(c *C) {
-	(&TestDbSuite{}).SetUpSuite(c)
+	DbFacade = dbTest.InitDbFacade(c)
 }
 
 func (s *TestDbNqmSuite) TearDownSuite(c *C) {
-	(&TestDbSuite{}).TearDownSuite(c)
+	dbTest.ReleaseDbFacade(c, DbFacade)
 }
 
 /**
@@ -46,7 +47,7 @@ func (suite *TestDbNqmSuite) TestRefreshAgentInfo(c *C) {
 }
 
 func testRefreshAgentInfo(c *C, args refreshAgentTestCase) {
-	var testedAgent = model.NewNqmAgent(
+	var testedAgent = nqmModel.NewNqmAgent(
 		&commonModel.NqmTaskRequest{
 			ConnectionId: args.connectionId,
 			Hostname:     args.hostName,
@@ -69,10 +70,10 @@ func testRefreshAgentInfo(c *C, args refreshAgentTestCase) {
 	var testedIpAddress net.IP
 	var testedLenOfIpAddress int
 
-	hbstesting.QueryForRow(
-		func(row *sql.Row) {
+	DbFacade.SqlDbCtrl.QueryForRow(
+		commonDb.RowCallbackFunc(func(row *sql.Row) {
 			row.Scan(&testedConnectionId, &testedHostName, &testedIpAddress, &testedLenOfIpAddress)
-		},
+		}),
 		"SELECT ag_connection_id, ag_hostname, ag_ip_address, BIT_LENGTH(ag_ip_address) AS len_of_ip_address FROM nqm_agent WHERE ag_id = ?",
 		testedAgent.Id,
 	)
@@ -179,10 +180,11 @@ func assertRefreshedPingTask(c *C, testCase *getAndRefreshNeedPingAgentTestCase)
 	 * Asserts the number of modified time of last executed
 	 */
 	var numberOfModified int = -1
-	hbstesting.QueryForRow(
-		func(row *sql.Row) {
+
+	DbFacade.SqlDbCtrl.QueryForRow(
+		commonDb.RowCallbackFunc(func(row *sql.Row) {
 			row.Scan(&numberOfModified)
-		},
+		}),
 		`
 		SELECT COUNT(*)
 		FROM nqm_agent_ping_task
@@ -275,14 +277,12 @@ func (suite *TestDbNqmSuite) TestTriggersOfFiltersForPingTask(c *C) {
 		/**
 		 * Executes INSERT/DELETE statements
 		 */
-		hbstesting.ExecuteQueriesOrFailInTx(
-			testCase.sqls...,
-		)
+		DbFacade.SqlDbCtrl.InTx(commonDb.BuildTxForSqls(testCase.sqls...))
 		// :~)
 
 		numberOfRows := 0
-		hbstesting.QueryForRow(
-			func(row *sql.Row) {
+		DbFacade.SqlDbCtrl.QueryForRow(
+			commonDb.RowCallbackFunc(func(row *sql.Row) {
 				numberOfRows++
 
 				var numberOfIspFilters int
@@ -308,7 +308,7 @@ func (suite *TestDbNqmSuite) TestTriggersOfFiltersForPingTask(c *C) {
 				c.Assert(numberOfNameTagFilters, Equals, testCase.expectedNumberOfNameTagFilters);
 				c.Assert(numberOfGroupTagFilters, Equals, testCase.expectedNumberOfGroupTagFilters);
 				// :~)
-			},
+			}),
 			`
 			SELECT
 				pt_number_of_isp_filters,
@@ -342,15 +342,17 @@ func (suite *TestDbNqmSuite) Test_vw_enabled_targets_by_ping_task(c *C) {
 		c.Logf("Current tested id of ping task: [%d]", testCase.pingTaskId)
 
 		var numberOfRows int = 0
-		hbstesting.QueryForRows(
-			func (row *sql.Rows) {
+		DbFacade.SqlDbCtrl.QueryForRows(
+			commonDb.RowsCallbackFunc(func (row *sql.Rows) commonDb.IterateControl {
 				numberOfRows++
 
 				var targetId int32
 
 				row.Scan(&targetId)
-				c.Logf("Current target: [%v]", targetId);
-			},
+				c.Logf("Current target: [%v]", targetId)
+
+				return commonDb.IterateContinue
+			}),
 			`
 			SELECT tg_id FROM vw_enabled_targets_by_ping_task
 			WHERE tg_pt_id = ?
@@ -364,13 +366,11 @@ func (suite *TestDbNqmSuite) Test_vw_enabled_targets_by_ping_task(c *C) {
 }
 
 func (s *TestDbNqmSuite) SetUpTest(c *C) {
-	if !hbstesting.HasDbEnvForMysqlOrSkip(c) {
-		return
-	}
+	var executeInTx = DbFacade.SqlDbCtrl.ExecQueriesInTx
 
 	switch c.TestName() {
 	case "TestDbNqmSuite.Test_vw_enabled_targets_by_ping_task":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`
 			INSERT INTO owl_name_tag(nt_id, nt_value)
 			VALUES (4071, 'vw-tag-1'), (4072, 'vw-tag-2')
@@ -456,7 +456,7 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 			`,
 		)
 	case "TestDbNqmSuite.TestTriggersOfFiltersForPingTask":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`
 			INSERT INTO owl_name_tag(nt_id, nt_value)
 			VALUES (3071, 'tri-tag-1'), (3072, 'tri-tag-2')
@@ -471,17 +471,21 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 			`,
 		)
 	case "TestDbNqmSuite.TestGetAndRefreshNeedPingAgentForRpc":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`SET time_zone = '+08:00'`,
 			`
 			INSERT INTO owl_group_tag(gt_id, gt_name)
 			VALUES(9931, 'blue-1'), (9932, 'blue-2'), (9933, 'blue-3')
 			`,
 			`
-			INSERT INTO nqm_agent(ag_id, ag_connection_id, ag_hostname, ag_ip_address, ag_isp_id, ag_status)
+			INSERT INTO host(id, hostname, agent_version, plugin_version)
+			VALUES(40051, 'tt1.org', '', '')
+			`,
+			`
+			INSERT INTO nqm_agent(ag_id, ag_hs_id, ag_connection_id, ag_hostname, ag_ip_address, ag_isp_id, ag_status)
 			VALUES
-				(130001, 'gc-1', 'tt1.org', 0x12345678, 3, TRUE), # Enabled agent(with complex situation)
-				(130002, 'gc-5', 'tt5.org', 0x15345678, 3, FALSE) # The agent is disabled
+				(130001, 40051, 'gc-1', 'tt1.org', 0x12345678, 3, TRUE), # Enabled agent(with complex situation)
+				(130002, 40051, 'gc-5', 'tt5.org', 0x15345678, 3, FALSE) # The agent is disabled
 			`,
 			`
 			INSERT INTO nqm_agent_group_tag(agt_ag_id, agt_gt_id)
@@ -520,7 +524,7 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 			`,
 		)
 	case "TestDbNqmSuite.TestGetPingTaskState":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`
 			INSERT INTO owl_name_tag(nt_id, nt_value)
 			VALUES(9031, 'nt-1')
@@ -530,16 +534,20 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 			VALUES(20051, 'gt-1')
 			`,
 			`
-			INSERT INTO nqm_agent(ag_id, ag_connection_id, ag_hostname, ag_ip_address)
+			INSERT INTO host(id, hostname, agent_version, plugin_version)
+			VALUES(32021, 'aaa1.ccc', '', '')
+			`,
+			`
+			INSERT INTO nqm_agent(ag_id, ag_hs_id, ag_connection_id, ag_hostname, ag_ip_address)
 			VALUES
-				(2001, 'pt-01', 'aaa1.ccc', 0x12345671), # The agent has no ping task
-				(2002, 'pt-02', 'aaa2.ccc', 0x12345672), # The agent has ping task, which are disabled
-				(2003, 'pt-03', 'aaa3.ccc', 0x12345673), # The agent has ping task with filter(isp)
-				(2004, 'pt-04', 'aaa4.ccc', 0x12345674), # The agent has ping task with filter(province)
-				(2005, 'pt-05', 'aaa5.ccc', 0x12345675), # The agent has ping task with filter(city)
-				(2006, 'pt-06', 'aaa6.ccc', 0x12345676), # The agent has ping task with filter(name tag)
-				(2007, 'pt-07', 'aaa7.ccc', 0x12345677), # The agent has ping task with filter(group tag)
-				(2010, 'pt-10', 'aaa10.ccc', 0x14345679) # The agent has ping task without filter
+				(2001, 32021, 'pt-01', 'aaa1.ccc', 0x12345671), # The agent has no ping task
+				(2002, 32021, 'pt-02', 'aaa2.ccc', 0x12345672), # The agent has ping task, which are disabled
+				(2003, 32021, 'pt-03', 'aaa3.ccc', 0x12345673), # The agent has ping task with filter(isp)
+				(2004, 32021, 'pt-04', 'aaa4.ccc', 0x12345674), # The agent has ping task with filter(province)
+				(2005, 32021, 'pt-05', 'aaa5.ccc', 0x12345675), # The agent has ping task with filter(city)
+				(2006, 32021, 'pt-06', 'aaa6.ccc', 0x12345676), # The agent has ping task with filter(name tag)
+				(2007, 32021, 'pt-07', 'aaa7.ccc', 0x12345677), # The agent has ping task with filter(group tag)
+				(2010, 32021, 'pt-10', 'aaa10.ccc', 0x14345679) # The agent has ping task without filter
 			`,
 			`
 			INSERT INTO nqm_ping_task(
@@ -589,17 +597,21 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 			`,
 		)
 	case "TestDbNqmSuite.TestGetTargetsByAgentForRpc":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`
 			INSERT INTO owl_group_tag(gt_id, gt_name)
 			VALUES(12021, 'bmw-1'), (12022, 'bmw-2'), (12023, 'bmw-3'), (12024, 'bmw-4')
 			`,
 			`
-			INSERT INTO nqm_agent(ag_id, ag_connection_id, ag_hostname, ag_ip_address)
+			INSERT INTO host(id, hostname, agent_version, plugin_version)
+			VALUES(40091, 'tl-01', '', '')
+			`,
+			`
+			INSERT INTO nqm_agent(ag_id, ag_hs_id, ag_connection_id, ag_hostname, ag_ip_address)
 			VALUES
-				(230001, 'tl-01', 'ccb1.ccc', 0x12345678),
-				(230002, 'tl-02', 'ccb2.ccc', 0x22345678),
-				(230003, 'tl-03', 'ccb3.ccc', 0x32345678)
+				(230001, 40091, 'tl-01', 'ccb1.ccc', 0x12345678),
+				(230002, 40091, 'tl-02', 'ccb2.ccc', 0x22345678),
+				(230003, 40091, 'tl-03', 'ccb3.ccc', 0x32345678)
 			`,
 			`
 			INSERT INTO nqm_target(
@@ -650,9 +662,11 @@ func (s *TestDbNqmSuite) SetUpTest(c *C) {
 }
 
 func (s *TestDbNqmSuite) TearDownTest(c *C) {
+	var executeInTx = DbFacade.SqlDbCtrl.ExecQueriesInTx
+
 	switch c.TestName() {
 	case "TestDbNqmSuite.Test_vw_enabled_targets_by_ping_task":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`DELETE FROM nqm_ping_task WHERE pt_id >= 47301 AND pt_id <= 47311`,
 			`DELETE FROM nqm_target WHERE tg_id >= 72001 AND tg_id <= 72014`,
 			`DELETE FROM owl_name_tag WHERE nt_id >= 4071 AND nt_id <= 4072`,
@@ -660,37 +674,41 @@ func (s *TestDbNqmSuite) TearDownTest(c *C) {
 			`DELETE FROM owl_group_tag WHERE gt_id >= 23201 AND gt_id <= 23203`,
 		)
 	case "TestDbNqmSuite.TestTriggersOfFiltersForPingTask":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			`DELETE FROM nqm_ping_task WHERE pt_id = 9201`,
 			`DELETE FROM owl_name_tag WHERE nt_id >= 3071 AND nt_id <= 3072`,
 			`DELETE FROM owl_group_tag WHERE gt_id >= 70021 AND gt_id <= 70022`,
 		)
 	case "TestDbNqmSuite.TestRefreshAgentInfo":
-		hbstesting.ExecuteOrFail(
+		executeInTx(
 			"DELETE FROM nqm_agent WHERE ag_connection_id = 'refresh-1'",
+			"DELETE FROM host WHERE hostname = 'refresh1.com'",
 		)
 	case "TestDbNqmSuite.TestGetAndRefreshNeedPingAgentForRpc":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			"DELETE FROM nqm_agent_ping_task WHERE apt_ag_id >= 130001 AND apt_ag_id <= 130005",
 			"DELETE FROM nqm_ping_task WHERE pt_id >= 9401 AND pt_id <= 9410",
 			"DELETE FROM nqm_agent_group_tag WHERE agt_ag_id >= 130001 AND agt_ag_id <= 130005",
 			"DELETE FROM nqm_agent WHERE ag_id >= 130001 AND ag_id <= 130005",
+			"DELETE FROM host WHERE id = 40051",
 			"DELETE FROM owl_group_tag WHERE gt_id >= 9931 AND gt_id <= 9933",
 		)
 	case "TestDbNqmSuite.TestGetPingTaskState":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			"DELETE FROM nqm_agent_ping_task WHERE apt_ag_id >= 2001 AND apt_ag_id <= 2010",
 			"DELETE FROM nqm_ping_task WHERE pt_id >= 7001 AND pt_id <= 7010",
 			"DELETE FROM nqm_agent WHERE ag_id >= 2001 AND ag_id <= 2010",
+			"DELETE FROM host WHERE id = 32021",
 			"DELETE FROM owl_name_tag WHERE nt_id = 9031",
 			"DELETE FROM owl_group_tag WHERE gt_id = 20051",
 		)
 	case "TestDbNqmSuite.TestGetTargetsByAgentForRpc":
-		hbstesting.ExecuteQueriesOrFailInTx(
+		executeInTx(
 			"DELETE FROM nqm_agent_ping_task WHERE apt_ag_id >= 230001 AND apt_ag_id <= 230003",
 			"DELETE FROM nqm_ping_task WHERE pt_id >= 34021 AND pt_id <= 34023",
 			"DELETE FROM nqm_target_group_tag WHERE tgt_tg_id >= 402001 AND tgt_tg_id <= 402010",
 			"DELETE FROM nqm_agent WHERE ag_id >= 230001 AND ag_id <= 230003",
+			"DELETE FROM host WHERE id = 40091",
 			"DELETE FROM nqm_target WHERE tg_id >= 402001 AND tg_id <= 402010",
 			"DELETE FROM owl_group_tag WHERe gt_id >= 12021 AND gt_id <= 12024",
 		)

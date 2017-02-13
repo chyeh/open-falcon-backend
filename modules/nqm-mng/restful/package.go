@@ -37,6 +37,11 @@ func initApi() {
 	v1.GET("/nqm/agent/:agent_id", getAgentById)
 	v1.POST("/nqm/agent", addNewAgent)
 	v1.PUT("/nqm/agent/:agent_id", modifyAgent)
+	v1.POST("/nqm/agent/:agent_id/pingtask", addPingtaskToAgentForAgent)
+	v1.DELETE("/nqm/agent/:agent_id/pingtask/:pingtask_id", removePingtaskFromAgentForAgent)
+
+	v1.POST("/nqm/pingtask/:pingtask_id/agent", addPingtaskToAgentForPingtask)
+	v1.DELETE("/nqm/pingtask/:pingtask_id/agent/:agent_id", removePingtaskFromAgentForPingtask)
 
 	v1.GET("/nqm/targets", listTargets)
 	v1.GET("/nqm/target/:target_id", getTargetById)

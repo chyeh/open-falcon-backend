@@ -10,6 +10,22 @@ import (
 	"github.com/chyeh/cast"
 )
 
+func listPingtasks(c *gin.Context) {
+	c.JSON(http.StatusOK, "")
+}
+
+func getPingtasksById(c *gin.Context) {
+	c.JSON(http.StatusOK, "")
+}
+
+func addNewPingtask(c *gin.Context) {
+	c.JSON(http.StatusCreated, "")
+}
+
+func modifyPingtask(c *gin.Context) {
+	c.JSON(http.StatusOK, "")
+}
+
 func addPingtaskToAgentForAgent(c *gin.Context) {
 	/**
 	 * Builds data from body of request

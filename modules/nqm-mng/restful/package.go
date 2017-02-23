@@ -1,8 +1,8 @@
 package restful
 
 import (
-	"github.com/Cepave/open-falcon-backend/common/gin/mvc"
 	commonGin "github.com/Cepave/open-falcon-backend/common/gin"
+	"github.com/Cepave/open-falcon-backend/common/gin/mvc"
 
 	log "github.com/Cepave/open-falcon-backend/common/logruslog"
 	gin "gopkg.in/gin-gonic/gin.v1"
@@ -41,7 +41,7 @@ func initApi() {
 	v1.DELETE("/nqm/agent/:agent_id/pingtask/:pingtask_id", removePingtaskFromAgentForAgent)
 
 	v1.GET("/nqm/pingtasks", listPingtasks)
-	v1.GET("/nqm/pingtask/:pingtask_id", getPingtasksById)
+	v1.GET("/nqm/pingtask/:pingtask_id", mvcBuilder.BuildHandler(getPingtasksById))
 	v1.POST("/nqm/pingtask", addNewPingtask)
 	v1.PUT("/nqm/pingtask/:pingtask_id", modifyPingtask)
 	v1.POST("/nqm/pingtask/:pingtask_id/agent", addPingtaskToAgentForPingtask)

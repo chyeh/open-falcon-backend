@@ -7,15 +7,102 @@ import (
 
 	commonNqmDb "github.com/Cepave/open-falcon-backend/common/db/nqm"
 	commonGin "github.com/Cepave/open-falcon-backend/common/gin"
+	"github.com/Cepave/open-falcon-backend/common/gin/mvc"
+	commonModel "github.com/Cepave/open-falcon-backend/common/model"
+	commonNqmModel "github.com/Cepave/open-falcon-backend/common/model/nqm"
 	"github.com/chyeh/cast"
 )
 
 func listPingtasks(c *gin.Context) {
-	c.JSON(http.StatusOK, "")
+	/**
+	 * Set-up paging
+	 */
+	paging := commonGin.PagingByHeader(
+		c,
+		&commonModel.Paging{
+			Size:     50,
+			Position: 1,
+		},
+	)
+	// :~)
+
+	query := buildQueryForListPingtasks(c)
+	pingtasks, resultPaging := commonNqmDb.ListPingtasks(query, *paging)
+
+	commonGin.HeaderWithPaging(c, resultPaging)
+	c.JSON(http.StatusOK, pingtasks)
 }
 
-func getPingtasksById(c *gin.Context) {
-	c.JSON(http.StatusOK, "")
+//func listPingtasks(
+//	p *struct {
+//		Period             string        `mvc:"query[period]"`
+//		Name               string        `mvc:"query[name]"`
+//		Enable             string        `mvc:"query[enable]"`
+//		Comment            string        `mvc:"query[comment]"`
+//		NumOfEnabledAgents string        `mvc:"query[num_of_enabled_agents]"`
+//		Paging             *model.Paging `mvc:"pageSize[50] pageOrderBy[period#asc:name#asc:enable#desc:comment#asc:num_of_enabled_agents#desc]"`
+//	},
+//) (*model.Paging, mvc.OutputBody) {
+//	return p.Paging,
+//		mvc.JsonOutputBody(
+//			commonNqmDb.ListPingtasks(p.Name, p.Paging),
+//		)
+//}
+
+func buildQueryForListPingtasks(c *gin.Context) *commonNqmModel.PingtaskQuery {
+	query := &commonNqmModel.PingtaskQuery{}
+
+	if v, ok := c.GetQuery("period"); ok {
+		query.Period = v
+	}
+	if v, ok := c.GetQuery("name"); ok {
+		query.Name = v
+	}
+	if v, ok := c.GetQuery("enable"); ok {
+		query.Enable = v
+	}
+	if v, ok := c.GetQuery("comment"); ok {
+		query.Comment = v
+	}
+	if v, ok := c.GetQuery("num_of_enabled_agents"); ok {
+		query.NumOfEnabledAgents = v
+	}
+
+	return query
+}
+
+//func getPingtasksById(c *gin.Context) {
+//pingtaskId, err := strconv.Atoi(c.Param("pingtask_id"))
+//if err != nil {
+//	commonGin.OutputJsonIfNotNil(c, nil)
+//}
+
+//var pingtaskIDStr string
+//var pingtaskID int32
+//if v := c.Param("pingtask_id"); v != "" {
+//	pingtaskIDStr = v
+//}
+//if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
+//	pingtaskID = v
+//}
+
+//pingtask := commonNqmDb.GetPingtaskById(pingtaskID)
+
+//commonGin.OutputJsonIfNotNil(c, pingtask)
+//c.JSON(http.StatusOK, "")
+//}
+
+func getPingtasksById(
+	p *struct {
+		PingtaskID int16 `mvc:"param[pingtask_id]"`
+	},
+) mvc.OutputBody {
+	pingtask := commonNqmDb.GetPingtaskById(p.PingtaskID)
+	if pingtask == nil {
+		return mvc.NotFoundOutputBody
+	}
+
+	return mvc.JsonOutputBody(pingtask)
 }
 
 func addNewPingtask(c *gin.Context) {

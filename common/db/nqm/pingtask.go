@@ -1,6 +1,8 @@
 package nqm
 
 import (
+	"database/sql"
+
 	"github.com/jinzhu/gorm"
 	"github.com/jmoiron/sqlx"
 
@@ -322,4 +324,114 @@ func GetPingtaskById(id int16) *nqmModel.PingtaskView {
 
 	loadedPingtask.AfterLoad()
 	return loadedPingtask
+}
+
+type addPingtaskTx struct {
+	pingtask *nqmModel.PingtaskModify
+	res      sql.Result
+	err      error
+}
+
+func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
+	r := tx.MustExec(
+		`
+		INSERT INTO nqm_ping_task(pt_period,pt_name,pt_enable,pt_comment)
+		VALUES
+		(?,?,?,?)
+		`,
+		p.pingtask.Period,
+		p.pingtask.Name,
+		p.pingtask.Enable,
+		p.pingtask.Comment,
+	)
+	if p.err != nil {
+		return commonDb.TxRollback
+	}
+	p.res = r
+	return commonDb.TxCommit
+}
+
+func AddAndGetPingtask(pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
+	//if valueOfNameTag == "" {
+	//	return -1
+	//}
+
+	//tx.MustExec(
+	//	`
+	//	INSERT INTO owl_name_tag(nt_value)
+	//	SELECT ?
+	//	FROM DUAL
+	//	WHERE NOT EXISTS (
+	//		SELECT *
+	//		FROM owl_name_tag
+	//		WHERE nt_value = ?
+	//	)
+	//	`,
+	//	valueOfNameTag, valueOfNameTag,
+	//)
+
+	//var nameTagId int16
+	//sqlxExt.ToTxExt(tx).Get(
+	//	&nameTagId,
+	//	`
+	//	SELECT nt_id FROM owl_name_tag
+	//	WHERE nt_value = ?
+	//	`,
+	//	valueOfNameTag,
+	//)
+	txProcessor := &addPingtaskTx{
+		pingtask: pm,
+	}
+
+	DbFacade.NewSqlxDbCtrl().InTx(txProcessor)
+	// :~)
+
+	if txProcessor.err != nil {
+		commonDb.PanicIfError(txProcessor.err)
+	}
+	ptId, _ := txProcessor.res.LastInsertId()
+	return GetPingtaskById(int16(ptId))
+}
+
+type updatePingtaskTx struct {
+	pingtask   *nqmModel.PingtaskModify
+	pingtaskID int16
+	err        error
+}
+
+func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
+	tx.MustExec(
+		`
+		UPDATE nqm_ping_task SET
+		pt_period = ?,
+		pt_name = ?,
+		pt_enable = ?,
+		pt_comment = ?
+		WHERE pt_id = ?
+		`,
+		u.pingtask.Period,
+		u.pingtask.Name,
+		u.pingtask.Enable,
+		u.pingtask.Comment,
+		u.pingtaskID,
+	)
+	if u.err != nil {
+		return commonDb.TxRollback
+	}
+	return commonDb.TxCommit
+}
+
+func UpdateAndGetPingtask(id int16, pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
+	txProcessor := &updatePingtaskTx{
+		pingtaskID: id,
+		pingtask:   pm,
+	}
+
+	DbFacade.NewSqlxDbCtrl().InTx(txProcessor)
+	// :~)
+
+	if txProcessor.err != nil {
+		commonDb.PanicIfError(txProcessor.err)
+	}
+	return GetPingtaskById(txProcessor.pingtaskID)
 }

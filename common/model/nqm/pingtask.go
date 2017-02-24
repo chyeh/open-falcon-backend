@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	owlJson "github.com/Cepave/open-falcon-backend/common/json"
+	owlGin "github.com/Cepave/open-falcon-backend/common/gin"
 	commonOwlModel "github.com/Cepave/open-falcon-backend/common/model/owl"
 	"github.com/chyeh/cast"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 type AgentPingtask struct {
@@ -22,13 +23,21 @@ type pingtaskFilter struct {
 	GroupTagFilters []*commonOwlModel.GroupTagOfPingtaskView `json:"group_tags"`
 }
 
+type pingtaskModifyFilter struct {
+	IspIds      []string `json:"ids_of_isp"`
+	ProvinceIds []string `json:"ids_of_province"`
+	CityIds     []string `json:"ids_of_city"`
+	NameTagIds  []string `json:"ids_of_name_tag"`
+	GroupTagIds []string `json:"ids_of_group_tag"`
+}
+
 type PingtaskView struct {
-	ID                 int16              `gorm:"primary_key:true;column:pt_id" json:"id"`
-	Period             int8               `gorm:"column:pt_period" json:"period"`
-	Name               owlJson.JsonString `gorm:"column:pt_name" json:"name"`
-	Enable             bool               `gorm:"column:pt_enable" json:"enable"`
-	Comment            owlJson.JsonString `gorm:"column:pt_comment" json:"comment"`
-	NumOfEnabledAgents int8               `gorm:"column:pt_num_of_enabled_agents" json:"num_of_enabled_agents"`
+	ID                 int16   `gorm:"primary_key:true;column:pt_id" json:"id"`
+	Period             int8    `gorm:"column:pt_period" json:"period"`
+	Name               *string `gorm:"column:pt_name" json:"name"`
+	Enable             bool    `gorm:"column:pt_enable" json:"enable"`
+	Comment            *string `gorm:"column:pt_comment" json:"comment"`
+	NumOfEnabledAgents int8    `gorm:"column:pt_num_of_enabled_agents" json:"num_of_enabled_agents"`
 
 	IdsOfIspFilters  string `gorm:"column:pt_isp_filter_ids" json:"-"`
 	NamesOfIspFilter string `gorm:"column:pt_isp_filter_names" json:"-"`
@@ -100,6 +109,7 @@ func (PingtaskView) TableName() string {
 //}
 
 func (p *PingtaskView) AfterLoad() {
+
 	var ids []string
 	var names []string
 	p.Filter.IspFilters = make([]*commonOwlModel.IspOfPingtaskView, 0)
@@ -213,4 +223,16 @@ func (p *PingtaskView) AfterLoad() {
 			)
 		}
 	}
+}
+
+type PingtaskModify struct {
+	Period  int16                `json:"period"`
+	Name    string               `json:"name"`
+	Enable  bool                 `json:"enable"`
+	Comment string               `json:"comment"`
+	Filter  pingtaskModifyFilter `json:"filter"`
+}
+
+func (p *PingtaskModify) Bind(c *gin.Context) {
+	owlGin.BindJson(c, p)
 }

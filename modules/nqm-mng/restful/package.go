@@ -42,8 +42,8 @@ func initApi() {
 
 	v1.GET("/nqm/pingtasks", listPingtasks)
 	v1.GET("/nqm/pingtask/:pingtask_id", mvcBuilder.BuildHandler(getPingtasksById))
-	v1.POST("/nqm/pingtask", addNewPingtask)
-	v1.PUT("/nqm/pingtask/:pingtask_id", modifyPingtask)
+	v1.POST("/nqm/pingtask", mvcBuilder.BuildHandler(addNewPingtask))
+	v1.PUT("/nqm/pingtask/:pingtask_id", mvcBuilder.BuildHandler(modifyPingtask))
 	v1.POST("/nqm/pingtask/:pingtask_id/agent", addPingtaskToAgentForPingtask)
 	v1.DELETE("/nqm/pingtask/:pingtask_id/agent/:agent_id", removePingtaskFromAgentForPingtask)
 

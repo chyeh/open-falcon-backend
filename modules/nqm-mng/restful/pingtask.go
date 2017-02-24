@@ -105,12 +105,26 @@ func getPingtasksById(
 	return mvc.JsonOutputBody(pingtask)
 }
 
-func addNewPingtask(c *gin.Context) {
-	c.JSON(http.StatusCreated, "")
+//func addNewPingtask(c *gin.Context) {
+//	fmt.Println(c.Value("period"))
+//	c.JSON(http.StatusCreated, "fuck")
+//}
+
+func addNewPingtask(
+	pm *commonNqmModel.PingtaskModify,
+) mvc.OutputBody {
+	pingtask := commonNqmDb.AddAndGetPingtask(pm)
+	return mvc.JsonOutputBody(pingtask)
 }
 
-func modifyPingtask(c *gin.Context) {
-	c.JSON(http.StatusOK, "")
+func modifyPingtask(
+	p *struct {
+		ID int16 `mvc:"param[pingtask_id]"`
+	},
+	pm *commonNqmModel.PingtaskModify,
+) mvc.OutputBody {
+	pingtask := commonNqmDb.UpdateAndGetPingtask(p.ID, pm)
+	return mvc.JsonOutputBody(pingtask)
 }
 
 func addPingtaskToAgentForAgent(c *gin.Context) {

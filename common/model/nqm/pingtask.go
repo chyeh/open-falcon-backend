@@ -24,11 +24,11 @@ type pingtaskFilter struct {
 }
 
 type pingtaskModifyFilter struct {
-	IspIds      []string `json:"ids_of_isp"`
-	ProvinceIds []string `json:"ids_of_province"`
-	CityIds     []string `json:"ids_of_city"`
-	NameTagIds  []string `json:"ids_of_name_tag"`
-	GroupTagIds []string `json:"ids_of_group_tag"`
+	IspIds      []int8  `json:"ids_of_isp"`
+	ProvinceIds []int8  `json:"ids_of_province"`
+	CityIds     []int8  `json:"ids_of_city"`
+	NameTagIds  []int8  `json:"ids_of_name_tag"`
+	GroupTagIds []int16 `json:"ids_of_group_tag"`
 }
 
 type PingtaskView struct {

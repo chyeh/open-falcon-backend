@@ -12,7 +12,7 @@ import (
 
 type AgentPingtask struct {
 	AgentID    int32 `json:"-"`
-	PingtaskID int32 `json:"-"`
+	PingtaskID int16 `json:"-"`
 }
 
 type pingtaskFilter struct {

@@ -132,12 +132,12 @@ func addPingtaskToAgentForAgent(c *gin.Context) {
 	 * Builds data from body of request
 	 */
 	var pingtaskIDStr string
-	var pingtaskID int32
+	var pingtaskID int16
 
 	if v, ok := c.GetQuery("pingtask_id"); ok {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -184,11 +184,11 @@ func removePingtaskFromAgentForAgent(c *gin.Context) {
 	}
 
 	var pingtaskIDStr string
-	var pingtaskID int32
+	var pingtaskID int16
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -223,12 +223,12 @@ func addPingtaskToAgentForPingtask(c *gin.Context) {
 	 * Builds data from body of request
 	 */
 	var pingtaskIDStr string
-	var pingtaskID int32
+	var pingtaskID int16
 
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -275,11 +275,11 @@ func removePingtaskFromAgentForPingtask(c *gin.Context) {
 	}
 
 	var pingtaskIDStr string
-	var pingtaskID int32
+	var pingtaskID int16
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 

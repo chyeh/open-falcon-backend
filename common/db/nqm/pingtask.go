@@ -43,7 +43,7 @@ func (agentPingtaskTx *addAgentPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	return commonDb.TxCommit
 }
 
-func AssignPingtaskToAgentForAgent(aID int32, pID int32) (*nqmModel.Agent, error) {
+func AssignPingtaskToAgentForAgent(aID int32, pID int16) (*nqmModel.Agent, error) {
 	txProcessor := &addAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -80,24 +80,8 @@ func (agentPingtaskTx *deleteAgentPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinal
 	return commonDb.TxCommit
 }
 
-func RemovePingtaskFromAgentForAgent(aID int32, pID int32) (*nqmModel.Agent, error) {
-	agent := GetAgentById(aID)
+func RemovePingtaskFromAgentForAgent(aID int32, pID int16) (*nqmModel.Agent, error) {
 	txProcessor := &deleteAgentPingtaskTx{
-		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
-	}
-
-	DbFacade.NewSqlxDbCtrl().InTx(txProcessor)
-	// :~)
-
-	if txProcessor.err != nil {
-		return nil, txProcessor.err
-	}
-
-	return agent, nil
-}
-
-func AssignPingtaskToAgentForPingtask(aID int32, pID int32) (*nqmModel.Agent, error) {
-	txProcessor := &addAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
 
@@ -111,8 +95,22 @@ func AssignPingtaskToAgentForPingtask(aID int32, pID int32) (*nqmModel.Agent, er
 	return GetAgentById(aID), nil
 }
 
-func RemovePingtaskFromAgentForPingtask(aID int32, pID int32) (*nqmModel.Agent, error) {
-	agent := GetAgentById(aID)
+func AssignPingtaskToAgentForPingtask(aID int32, pID int16) (*nqmModel.PingtaskView, error) {
+	txProcessor := &addAgentPingtaskTx{
+		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
+	}
+
+	DbFacade.NewSqlxDbCtrl().InTx(txProcessor)
+	// :~)
+
+	if txProcessor.err != nil {
+		return nil, txProcessor.err
+	}
+
+	return GetPingtaskById(pID), nil
+}
+
+func RemovePingtaskFromAgentForPingtask(aID int32, pID int16) (*nqmModel.PingtaskView, error) {
 	txProcessor := &deleteAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -124,7 +122,7 @@ func RemovePingtaskFromAgentForPingtask(aID int32, pID int32) (*nqmModel.Agent, 
 		return nil, txProcessor.err
 	}
 
-	return agent, nil
+	return GetPingtaskById(pID), nil
 }
 
 var orderByDialectForPingtasks = commonModel.NewSqlOrderByDialect(

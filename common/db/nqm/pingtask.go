@@ -2,6 +2,7 @@ package nqm
 
 import (
 	"database/sql"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 	"github.com/jmoiron/sqlx"
@@ -221,8 +222,8 @@ func ListPingtasks(query *nqmModel.PingtaskQuery, paging commonModel.Paging) ([]
 		if query.Name != "" {
 			selectPingtask = selectPingtask.Where("pt_name LIKE ?", query.Name+"%")
 		}
-		if query.Enable != "" {
-			selectPingtask = selectPingtask.Where("pt_enable = ?", query.Enable)
+		if ena, err := strconv.ParseBool(query.Enable); query.Enable != "" && err != nil {
+			selectPingtask = selectPingtask.Where("pt_enable = ?", ena)
 		}
 		if query.Comment != "" {
 			selectPingtask = selectPingtask.Where("pt_comment LIKE ?", query.Comment+"%")

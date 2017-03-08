@@ -50,9 +50,8 @@ func (City2) TableName() string {
 
 // CCityOfPingtaskViewity represents the data of city in the PingtaskView
 type CityOfPingtaskView struct {
-	Id         int    `gorm:"primary_key:true;column:ct_id" json:"id"`
-	ProvinceId int    `gorm:"primary_key:true;column:pv_id" json:"province_id"`
-	Name       string `gorm:"column:ct_name" json:"name"`
+	Id   int    `gorm:"primary_key:true;column:ct_id" json:"id"`
+	Name string `gorm:"column:ct_name" json:"name"`
 }
 
 func (CityOfPingtaskView) TableName() string {

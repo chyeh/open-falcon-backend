@@ -47,9 +47,8 @@ type PingtaskView struct {
 	NamesOfProvinceFilter string `gorm:"column:pt_province_filter_names" json:"-"`
 	//ProvinceFilters       []*commonOwlModel.ProvinceOfPingtaskView
 
-	IdsOfCityFilters         string `gorm:"column:pt_city_filter_ids" json:"-"`
-	ProvinceIdsOfCityFilters string `gorm:"column:pt_city_filter_pv_ids" json:"-"`
-	NamesOfCityFilter        string `gorm:"column:pt_city_filter_names" json:"-"`
+	IdsOfCityFilters  string `gorm:"column:pt_city_filter_ids" json:"-"`
+	NamesOfCityFilter string `gorm:"column:pt_city_filter_names" json:"-"`
 	//CityFilters              []*commonOwlModel.CityOfPingtaskView
 
 	IdsOfNameTagFilters  string `gorm:"column:pt_name_tag_filter_ids" json:"-"`
@@ -165,7 +164,6 @@ func (p *PingtaskView) AfterLoad() {
 	//)
 	if p.IdsOfCityFilters != "" {
 		ids = strings.Split(p.IdsOfCityFilters, ",")
-		pvIds := strings.Split(p.ProvinceIdsOfCityFilters, ",")
 		names = strings.Split(p.NamesOfCityFilter, "\000")
 		if len(ids) != len(names) {
 			panic(fmt.Errorf("Error on parsing: Can't match ids and names"))
@@ -174,9 +172,8 @@ func (p *PingtaskView) AfterLoad() {
 			p.Filter.CityFilters = append(
 				p.Filter.CityFilters,
 				&commonOwlModel.CityOfPingtaskView{
-					Id:         cast.ToInt(ids[i]),
-					ProvinceId: cast.ToInt(pvIds[i]),
-					Name:       names[i],
+					Id:   cast.ToInt(ids[i]),
+					Name: names[i],
 				},
 			)
 		}

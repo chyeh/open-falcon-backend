@@ -1,7 +1,6 @@
 package nqm
 
 import (
-	"database/sql"
 	"strconv"
 
 	"github.com/jinzhu/gorm"
@@ -263,7 +262,6 @@ func GetPingtaskById(id int16) *nqmModel.PingtaskView {
 			GROUP_CONCAT(DISTINCT pv.pv_id ORDER BY pv_id ASC SEPARATOR ',') AS pt_province_filter_ids,
 			GROUP_CONCAT(DISTINCT pv.pv_name ORDER BY pv_id ASC SEPARATOR '\0') AS pt_province_filter_names,
 			GROUP_CONCAT(DISTINCT ct.ct_id ORDER BY ct_id ASC SEPARATOR ',') AS pt_city_filter_ids,
-			GROUP_CONCAT(DISTINCT ct.ct_pv_id ORDER BY ct_id ASC SEPARATOR ',') AS pt_city_filter_pv_ids,
 			GROUP_CONCAT(DISTINCT ct.ct_name ORDER BY ct_id ASC SEPARATOR '\0') AS pt_city_filter_names,
 			GROUP_CONCAT(DISTINCT nt.nt_id ORDER BY nt_id ASC SEPARATOR ',') AS pt_name_tag_filter_ids,
 			GROUP_CONCAT(DISTINCT nt.nt_value ORDER BY nt_id ASC SEPARATOR '\0') AS pt_name_tag_filter_values,
@@ -326,9 +324,9 @@ func GetPingtaskById(id int16) *nqmModel.PingtaskView {
 }
 
 type addPingtaskTx struct {
-	pingtask *nqmModel.PingtaskModify
-	res      sql.Result
-	err      error
+	pingtask   *nqmModel.PingtaskModify
+	pingtaskID int16
+	err        error
 }
 
 func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
@@ -343,10 +341,76 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		p.pingtask.Enable,
 		p.pingtask.Comment,
 	)
+	pID, _ := r.LastInsertId()
+	if len(p.pingtask.Filter.IspIds) != 0 {
+		for _, ispId := range p.pingtask.Filter.IspIds {
+			r = tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ispId,
+				pID,
+			)
+		}
+	}
+	if len(p.pingtask.Filter.ProvinceIds) != 0 {
+		for _, pvId := range p.pingtask.Filter.ProvinceIds {
+			r = tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
+		VALUES
+		(?,?)
+		`,
+				pvId,
+				pID,
+			)
+		}
+	}
+	if len(p.pingtask.Filter.CityIds) != 0 {
+		for _, ctId := range p.pingtask.Filter.CityIds {
+			r = tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ctId,
+				pID,
+			)
+		}
+	}
+	if len(p.pingtask.Filter.NameTagIds) != 0 {
+		for _, ntId := range p.pingtask.Filter.NameTagIds {
+			r = tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ntId,
+				pID,
+			)
+		}
+	}
+	if len(p.pingtask.Filter.GroupTagIds) != 0 {
+		for _, gtId := range p.pingtask.Filter.GroupTagIds {
+			r = tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
+		VALUES
+		(?,?)
+		`,
+				gtId,
+				pID,
+			)
+		}
+	}
 	if p.err != nil {
 		return commonDb.TxRollback
 	}
-	p.res = r
+	p.pingtaskID = int16(pID)
 	return commonDb.TxCommit
 }
 
@@ -388,8 +452,7 @@ func AddAndGetPingtask(pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
 	if txProcessor.err != nil {
 		commonDb.PanicIfError(txProcessor.err)
 	}
-	ptId, _ := txProcessor.res.LastInsertId()
-	return GetPingtaskById(int16(ptId))
+	return GetPingtaskById(txProcessor.pingtaskID)
 }
 
 type updatePingtaskTx struct {

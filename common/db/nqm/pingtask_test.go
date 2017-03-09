@@ -381,10 +381,32 @@ func (suite *TestPingtaskSuite) TestUpdateAndGetPingtask(c *C) {
 	`), &pm1); err != nil {
 		c.Error(err)
 	}
+	var pm2 *nqmModel.PingtaskModify
+	if err := json.Unmarshal([]byte(`
+		{
+		  "period" : 15,
+		  "name" : "廣東",
+		  "enable" : true,
+		  "comment" : "This is for some purpose",
+		  "filter" : {
+		    "ids_of_isp" : [ 17, 18 ],
+		    "ids_of_province" : [ 2, 3, 4 ],
+		    "ids_of_city" : [ 3 ]
+		  }
+		}
+	`), &pm2); err != nil {
+		c.Error(err)
+	}
 	testCases := []*struct {
-		inputPm *nqmModel.PingtaskModify
+		inputPm             *nqmModel.PingtaskModify
+		expectedIspLen      int
+		expectedProvinceLen int
+		expectedCityLen     int
+		expectedNameTagLen  int
+		expectedGroupTagLen int
 	}{
-		{pm1},
+		{pm1, 3, 2, 3, 0, 0},
+		{pm2, 2, 3, 1, 0, 0},
 	}
 	for i, v := range testCases {
 		actual := UpdateAndGetPingtask(10120, v.inputPm)
@@ -396,9 +418,10 @@ func (suite *TestPingtaskSuite) TestUpdateAndGetPingtask(c *C) {
 		c.Assert(*actual.Comment, Equals, "This is for some purpose")
 
 		// Tricky, so I only test the lengths
-		c.Logf("%+v :::: %d", actual.Filter.IspFilters, len(actual.Filter.IspFilters))
-		c.Assert(len(actual.Filter.IspFilters), Equals, 3)
-		c.Assert(len(actual.Filter.ProvinceFilters), Equals, 2)
-		c.Assert(len(actual.Filter.CityFilters), Equals, 3)
+		c.Assert(len(actual.Filter.IspFilters), Equals, v.expectedIspLen)
+		c.Assert(len(actual.Filter.ProvinceFilters), Equals, v.expectedProvinceLen)
+		c.Assert(len(actual.Filter.CityFilters), Equals, v.expectedCityLen)
+		c.Assert(len(actual.Filter.NameTagFilters), Equals, v.expectedNameTagLen)
+		c.Assert(len(actual.Filter.GroupTagFilters), Equals, v.expectedGroupTagLen)
 	}
 }

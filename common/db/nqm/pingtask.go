@@ -344,7 +344,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	pID, _ := r.LastInsertId()
 	if len(p.pingtask.Filter.IspIds) != 0 {
 		for _, ispId := range p.pingtask.Filter.IspIds {
-			r = tx.MustExec(
+			tx.MustExec(
 				`
 		INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
 		VALUES
@@ -357,7 +357,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	}
 	if len(p.pingtask.Filter.ProvinceIds) != 0 {
 		for _, pvId := range p.pingtask.Filter.ProvinceIds {
-			r = tx.MustExec(
+			tx.MustExec(
 				`
 		INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
 		VALUES
@@ -370,7 +370,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	}
 	if len(p.pingtask.Filter.CityIds) != 0 {
 		for _, ctId := range p.pingtask.Filter.CityIds {
-			r = tx.MustExec(
+			tx.MustExec(
 				`
 		INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
 		VALUES
@@ -383,7 +383,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	}
 	if len(p.pingtask.Filter.NameTagIds) != 0 {
 		for _, ntId := range p.pingtask.Filter.NameTagIds {
-			r = tx.MustExec(
+			tx.MustExec(
 				`
 		INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
 		VALUES
@@ -396,7 +396,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	}
 	if len(p.pingtask.Filter.GroupTagIds) != 0 {
 		for _, gtId := range p.pingtask.Filter.GroupTagIds {
-			r = tx.MustExec(
+			tx.MustExec(
 				`
 		INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
 		VALUES
@@ -477,6 +477,71 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		u.pingtask.Comment,
 		u.pingtaskID,
 	)
+	if len(u.pingtask.Filter.IspIds) != 0 {
+		for _, ispId := range u.pingtask.Filter.IspIds {
+			tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ispId,
+				u.pingtaskID,
+			)
+		}
+	}
+	if len(u.pingtask.Filter.ProvinceIds) != 0 {
+		for _, pvId := range u.pingtask.Filter.ProvinceIds {
+			tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
+		VALUES
+		(?,?)
+		`,
+				pvId,
+				u.pingtaskID,
+			)
+		}
+	}
+	if len(u.pingtask.Filter.CityIds) != 0 {
+		for _, ctId := range u.pingtask.Filter.CityIds {
+			tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ctId,
+				u.pingtaskID,
+			)
+		}
+	}
+	if len(u.pingtask.Filter.NameTagIds) != 0 {
+		for _, ntId := range u.pingtask.Filter.NameTagIds {
+			tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
+		VALUES
+		(?,?)
+		`,
+				ntId,
+				u.pingtaskID,
+			)
+		}
+	}
+	if len(u.pingtask.Filter.GroupTagIds) != 0 {
+		for _, gtId := range u.pingtask.Filter.GroupTagIds {
+			tx.MustExec(
+				`
+		INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
+		VALUES
+		(?,?)
+		`,
+				gtId,
+				u.pingtaskID,
+			)
+		}
+	}
 	if u.err != nil {
 		return commonDb.TxRollback
 	}

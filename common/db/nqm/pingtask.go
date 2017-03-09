@@ -346,10 +346,10 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ispId := range p.pingtask.Filter.IspIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ispId,
 				pID,
 			)
@@ -359,10 +359,10 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, pvId := range p.pingtask.Filter.ProvinceIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
+				VALUES
+				(?,?)
+				`,
 				pvId,
 				pID,
 			)
@@ -372,10 +372,10 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ctId := range p.pingtask.Filter.CityIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ctId,
 				pID,
 			)
@@ -385,10 +385,10 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ntId := range p.pingtask.Filter.NameTagIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ntId,
 				pID,
 			)
@@ -398,10 +398,10 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, gtId := range p.pingtask.Filter.GroupTagIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
+				VALUES
+				(?,?)
+				`,
 				gtId,
 				pID,
 			)
@@ -481,10 +481,10 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ispId := range u.pingtask.Filter.IspIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_isp(tfisp_isp_id,tfisp_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ispId,
 				u.pingtaskID,
 			)
@@ -494,10 +494,10 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, pvId := range u.pingtask.Filter.ProvinceIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_province(tfpv_pv_id,tfpv_pt_id)
+				VALUES
+				(?,?)
+				`,
 				pvId,
 				u.pingtaskID,
 			)
@@ -507,10 +507,10 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ctId := range u.pingtask.Filter.CityIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_city(tfct_ct_id,tfct_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ctId,
 				u.pingtaskID,
 			)
@@ -520,10 +520,10 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, ntId := range u.pingtask.Filter.NameTagIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_name_tag(tfnt_nt_id,tfnt_pt_id)
+				VALUES
+				(?,?)
+				`,
 				ntId,
 				u.pingtaskID,
 			)
@@ -533,10 +533,10 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		for _, gtId := range u.pingtask.Filter.GroupTagIds {
 			tx.MustExec(
 				`
-		INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
-		VALUES
-		(?,?)
-		`,
+				INSERT INTO nqm_pt_target_filter_group_tag(tfgt_gt_id,tfgt_pt_id)
+				VALUES
+				(?,?)
+				`,
 				gtId,
 				u.pingtaskID,
 			)

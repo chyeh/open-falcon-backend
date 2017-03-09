@@ -346,9 +346,21 @@ func (suite *TestPingtaskSuite) TestAddAndGetPingtask(c *C) {
 	}{
 		{pm1},
 	}
-	for _, v := range testCases {
+	for i, v := range testCases {
 		actual := AddAndGetPingtask(v.inputPm)
+		c.Logf("case [%d]: %+v\n", i+1, *actual)
 		c.Assert(actual, NotNil)
+		c.Assert(actual.Period, Equals, int8(15))
+		c.Assert(*actual.Name, Equals, "廣東")
+		c.Assert(actual.Enable, Equals, true)
+		c.Assert(*actual.Comment, Equals, "This is for some purpose")
+
+		// Tricky, so I only test the lengths
+		c.Assert(len(actual.Filter.IspFilters), Equals, 3)
+		c.Assert(len(actual.Filter.ProvinceFilters), Equals, 2)
+		c.Assert(len(actual.Filter.CityFilters), Equals, 3)
+		c.Assert(len(actual.Filter.NameTagFilters), Equals, 0)
+		c.Assert(len(actual.Filter.GroupTagFilters), Equals, 0)
 	}
 }
 
@@ -374,8 +386,19 @@ func (suite *TestPingtaskSuite) TestUpdateAndGetPingtask(c *C) {
 	}{
 		{pm1},
 	}
-	for _, v := range testCases {
+	for i, v := range testCases {
 		actual := UpdateAndGetPingtask(10120, v.inputPm)
+		c.Logf("case [%d]: %+v\n", i+1, *actual)
 		c.Assert(actual, NotNil)
+		c.Assert(actual.Period, Equals, int8(15))
+		c.Assert(*actual.Name, Equals, "廣東")
+		c.Assert(actual.Enable, Equals, true)
+		c.Assert(*actual.Comment, Equals, "This is for some purpose")
+
+		// Tricky, so I only test the lengths
+		c.Logf("%+v :::: %d", actual.Filter.IspFilters, len(actual.Filter.IspFilters))
+		c.Assert(len(actual.Filter.IspFilters), Equals, 3)
+		c.Assert(len(actual.Filter.ProvinceFilters), Equals, 2)
+		c.Assert(len(actual.Filter.CityFilters), Equals, 3)
 	}
 }

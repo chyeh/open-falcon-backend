@@ -97,12 +97,7 @@ func getPingtasksById(
 		PingtaskID int16 `mvc:"param[pingtask_id]"`
 	},
 ) mvc.OutputBody {
-	pingtask := commonNqmDb.GetPingtaskById(p.PingtaskID)
-	if pingtask == nil {
-		return mvc.NotFoundOutputBody
-	}
-
-	return mvc.JsonOutputBody(pingtask)
+	return mvc.JsonOutputOrNotFound(commonNqmDb.GetPingtaskById(p.PingtaskID))
 }
 
 //func addNewPingtask(c *gin.Context) {

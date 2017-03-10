@@ -75,7 +75,8 @@ func (s *TestPingtaskSuite) TearDownTest(c *C) {
 	case
 		"TestPingtaskSuite.TestGetPingtaskById",
 		"TestPingtaskSuite.TestListPingtasks",
-		"TestPingtaskSuite.TestUpdateAndGetPingtask":
+		"TestPingtaskSuite.TestUpdateAndGetPingtask",
+		"TestPingtaskSuite.TestAddAndGetPingtask":
 		inTx(DeletePingtaskSQL)
 	case
 		"TestPingtaskSuite.TestAssignPingtaskToAgentForAgent",
@@ -83,8 +84,6 @@ func (s *TestPingtaskSuite) TearDownTest(c *C) {
 		"TestPingtaskSuite.TestAssignPingtaskToAgentForPingtask",
 		"TestPingtaskSuite.TestRemovePingtaskFromAgentForPingtask":
 		inTx(CleanNqmAgentAndPingtaskSQL...)
-	case
-		"TestPingtaskSuite.TestAddAndGetPingtask":
 	}
 }
 

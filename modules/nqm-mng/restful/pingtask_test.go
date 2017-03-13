@@ -181,19 +181,17 @@ func (suite *TestPingtaskItSuite) TestRemovePingtaskToAgentForAgent(c *C) {
 
 func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForPingtask(c *C) {
 	testCases := []*struct {
-		inputPID                   int
-		inputAID                   int
-		expectedNumOfEnabledAgents int8
-		expectedPID                int
-		expectedStatus             int
+		inputPID       int
+		inputAID       int
+		expectedStatus int
 	}{
-		{10119, 24021, 1, 10119, http.StatusCreated},
-		{10119, 24022, 2, 10119, http.StatusCreated},
-		{10120, 24023, 1, 10120, http.StatusCreated},
+		{10119, 24021, http.StatusCreated},
+		{10119, 24022, http.StatusCreated},
+		{10120, 24023, http.StatusCreated},
 		// i > 2: cases for panic
-		{10121, 24024, -1, 0, http.StatusInternalServerError},
-		{10120, 24025, 1, 10120, http.StatusInternalServerError},
-		{10121, 24026, -1, 0, http.StatusInternalServerError},
+		{10121, 24024, http.StatusInternalServerError},
+		{10120, 24025, http.StatusInternalServerError},
+		{10121, 24026, http.StatusInternalServerError},
 	}
 	for i, v := range testCases {
 		c.Logf("case[%d]:", i)
@@ -208,19 +206,17 @@ func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForPingtask(c *C) {
 
 func (suite *TestPingtaskItSuite) TestRemovePingtaskToAgentForPingtask(c *C) {
 	testCases := []*struct {
-		inputPID                   int
-		inputAID                   int
-		expectedNumOfEnabledAgents int8
-		expectedPID                int
-		expectedStatus             int
+		inputPID       int
+		inputAID       int
+		expectedStatus int
 	}{
-		{10119, 24021, 1, 10119, http.StatusOK},
-		{10119, 24022, 2, 10119, http.StatusOK},
-		{10120, 24023, 1, 10120, http.StatusOK},
+		{10119, 24021, http.StatusOK},
+		{10119, 24022, http.StatusOK},
+		{10120, 24023, http.StatusOK},
 		// i > 2: cases for panic
-		{10121, 24024, -1, 0, http.StatusOK},
-		{10120, 24025, 1, 10120, http.StatusOK},
-		{10121, 24026, -1, 0, http.StatusOK},
+		{10121, 24024, http.StatusOK},
+		{10120, 24025, http.StatusOK},
+		{10121, 24026, http.StatusOK},
 	}
 	for _, v := range testCases {
 		req, _ := sling.New().Post(httpClientConfig.String()).

@@ -14,54 +14,54 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-type TestPingtaskItemSuite struct{}
+type TestPingtaskItSuite struct{}
 
-var _ = Suite(&TestPingtaskItemSuite{})
+var _ = Suite(&TestPingtaskItSuite{})
 
-func (s *TestPingtaskItemSuite) SetUpSuite(c *C) {
+func (s *TestPingtaskItSuite) SetUpSuite(c *C) {
 	testingDb.InitRdb(c)
 }
-func (s *TestPingtaskItemSuite) TearDownSuite(c *C) {
+func (s *TestPingtaskItSuite) TearDownSuite(c *C) {
 	testingDb.ReleaseRdb(c)
 }
 
-func (s *TestPingtaskItemSuite) SetUpTest(c *C) {
+func (s *TestPingtaskItSuite) SetUpTest(c *C) {
 	inTx := rdb.DbFacade.SqlDbCtrl.ExecQueriesInTx
 
 	switch c.TestName() {
 	case
-		"TestPingtaskItemSuite.TestGetPingtaskById",
-		"TestPingtaskItemSuite.TestListPingtasks",
-		"TestPingtaskItemSuite.TestModifyPingtask":
+		"TestPingtaskItSuite.TestGetPingtaskById",
+		"TestPingtaskItSuite.TestListPingtasks",
+		"TestPingtaskItSuite.TestModifyPingtask":
 		inTx(testingOwlDb.InsertPingtaskSQL)
 	case
-		"TestPingtaskItemSuite.TestAddPingtaskToAgentForAgent",
-		"TestPingtaskItemSuite.TestRemovePingtaskToAgentForAgent",
-		"TestPingtaskItemSuite.TestAddPingtaskToAgentForPingtask",
-		"TestPingtaskItemSuite.TestRemovePingtaskToAgentForPingtask":
+		"TestPingtaskItSuite.TestAddPingtaskToAgentForAgent",
+		"TestPingtaskItSuite.TestRemovePingtaskToAgentForAgent",
+		"TestPingtaskItSuite.TestAddPingtaskToAgentForPingtask",
+		"TestPingtaskItSuite.TestRemovePingtaskToAgentForPingtask":
 		inTx(testingOwlDb.InitNqmAgentAndPingtaskSQL...)
 	}
 }
-func (s *TestPingtaskItemSuite) TearDownTest(c *C) {
+func (s *TestPingtaskItSuite) TearDownTest(c *C) {
 	inTx := rdb.DbFacade.SqlDbCtrl.ExecQueriesInTx
 
 	switch c.TestName() {
 	case
-		"TestPingtaskItemSuite.TestGetPingtaskById",
-		"TestPingtaskItemSuite.TestListPingtasks",
-		"TestPingtaskItemSuite.TestModifyPingtask",
-		"TestPingtaskItemSuite.TestAddNewPingtask":
+		"TestPingtaskItSuite.TestGetPingtaskById",
+		"TestPingtaskItSuite.TestListPingtasks",
+		"TestPingtaskItSuite.TestModifyPingtask",
+		"TestPingtaskItSuite.TestAddNewPingtask":
 		inTx(testingOwlDb.DeletePingtaskSQL)
 	case
-		"TestPingtaskItemSuite.TestAddPingtaskToAgentForAgent",
-		"TestPingtaskItemSuite.TestRemovePingtaskToAgentForAgent",
-		"TestPingtaskItemSuite.TestAddPingtaskToAgentForPingtask",
-		"TestPingtaskItemSuite.TestRemovePingtaskToAgentForPingtask":
+		"TestPingtaskItSuite.TestAddPingtaskToAgentForAgent",
+		"TestPingtaskItSuite.TestRemovePingtaskToAgentForAgent",
+		"TestPingtaskItSuite.TestAddPingtaskToAgentForPingtask",
+		"TestPingtaskItSuite.TestRemovePingtaskToAgentForPingtask":
 		inTx(testingOwlDb.CleanNqmAgentAndPingtaskSQL...)
 	}
 }
 
-func (suite *TestPingtaskItemSuite) TestGetPingtaskById(c *C) {
+func (suite *TestPingtaskItSuite) TestGetPingtaskById(c *C) {
 	testCases := []*struct {
 		inputID           int
 		expectedStatus    int
@@ -88,7 +88,7 @@ func (suite *TestPingtaskItemSuite) TestGetPingtaskById(c *C) {
 	}
 }
 
-func (suite *TestPingtaskItemSuite) TestAddNewPingtask(c *C) {
+func (suite *TestPingtaskItSuite) TestAddNewPingtask(c *C) {
 	testCases := []*struct {
 		expectedStatus int
 	}{
@@ -119,7 +119,7 @@ func (suite *TestPingtaskItemSuite) TestAddNewPingtask(c *C) {
 	}
 }
 
-func (suite *TestPingtaskItemSuite) TestListPingtasks(c *C) {
+func (suite *TestPingtaskItSuite) TestListPingtasks(c *C) {
 	client := sling.New().Get(httpClientConfig.String()).
 		Path("/api/v1/nqm/pingtasks")
 
@@ -132,7 +132,7 @@ func (suite *TestPingtaskItemSuite) TestListPingtasks(c *C) {
 	c.Assert(len(message.MustArray()), Equals, 2)
 }
 
-func (suite *TestPingtaskItemSuite) TestModifyPingtask(c *C) {
+func (suite *TestPingtaskItSuite) TestModifyPingtask(c *C) {
 	testCases := []*struct {
 		inputID           int
 		expectedStatus    int
@@ -173,13 +173,13 @@ func (suite *TestPingtaskItemSuite) TestModifyPingtask(c *C) {
 	}
 }
 
-func (suite *TestPingtaskItemSuite) TestAddPingtaskToAgentForAgent(c *C) {
+func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForAgent(c *C) {
 }
 
-func (suite *TestPingtaskItemSuite) TestRemovePingtaskToAgentForAgent(c *C) {
+func (suite *TestPingtaskItSuite) TestRemovePingtaskToAgentForAgent(c *C) {
 }
 
-func (suite *TestPingtaskItemSuite) TestAddPingtaskToAgentForPingtask(c *C) {
+func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForPingtask(c *C) {
 	testCases := []*struct {
 		inputPID                   int
 		inputAID                   int
@@ -206,7 +206,7 @@ func (suite *TestPingtaskItemSuite) TestAddPingtaskToAgentForPingtask(c *C) {
 	}
 }
 
-func (suite *TestPingtaskItemSuite) TestRemovePingtaskToAgentForPingtask(c *C) {
+func (suite *TestPingtaskItSuite) TestRemovePingtaskToAgentForPingtask(c *C) {
 	testCases := []*struct {
 		inputPID                   int
 		inputAID                   int

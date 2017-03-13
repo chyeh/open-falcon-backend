@@ -174,9 +174,60 @@ func (suite *TestPingtaskItSuite) TestModifyPingtask(c *C) {
 }
 
 func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForAgent(c *C) {
+	testCases := []*struct {
+		inputAID       int
+		inputPID       int
+		expectedStatus int
+	}{
+		{24021, 10119, http.StatusCreated},
+		{24022, 10119, http.StatusCreated},
+		{24021, 10120, http.StatusCreated},
+		// i > 2: cases for panic
+		{24024, 10121, http.StatusInternalServerError},
+		{24025, 10120, http.StatusInternalServerError},
+		{24026, 10121, http.StatusInternalServerError},
+	}
+	for i, v := range testCases {
+		c.Logf("case[%d]:", i)
+		client := sling.New().Post(httpClientConfig.String()).
+			Path("/api/v1/nqm/agent/" + strconv.Itoa((v.inputAID)) + "/pingtask?pingtask_id=" + strconv.Itoa(v.inputPID))
+		slintChecker := testingHttp.NewCheckSlint(c, client)
+		jsonResult := slintChecker.GetJsonBody(v.expectedStatus)
+		c.Logf("[Modify Pingtask] JSON Result:\n%s", json.MarshalPrettyJSON(jsonResult))
+		c.Logf("%+v", jsonResult)
+	}
 }
 
 func (suite *TestPingtaskItSuite) TestRemovePingtaskToAgentForAgent(c *C) {
+	testCases := []*struct {
+		inputAID       int
+		inputPID       int
+		expectedStatus int
+	}{
+		{24021, 10119, http.StatusOK},
+		{24022, 10119, http.StatusOK},
+		{24021, 10120, http.StatusOK},
+		{24024, 10121, http.StatusOK},
+		// i > 3: cases for panic
+		{24025, 10120, http.StatusOK},
+		{24026, 10121, http.StatusOK},
+	}
+	for _, v := range testCases {
+		req, _ := sling.New().Post(httpClientConfig.String()).
+			Path("/api/v1/nqm/agent/" + strconv.Itoa((v.inputAID)) + "/pingtask?pingtask_id=" + strconv.Itoa(v.inputPID)).
+			Request()
+		client := &http.Client{}
+		client.Do(req)
+	}
+	for i, v := range testCases {
+		c.Logf("case[%d]:", i)
+		client := sling.New().Delete(httpClientConfig.String()).
+			Path("/api/v1/nqm/agent/" + strconv.Itoa((v.inputAID)) + "/pingtask/=" + strconv.Itoa(v.inputPID))
+		slintChecker := testingHttp.NewCheckSlint(c, client)
+		jsonResult := slintChecker.GetJsonBody(v.expectedStatus)
+		c.Logf("[Modify Pingtask] JSON Result:\n%s", json.MarshalPrettyJSON(jsonResult))
+		c.Logf("%+v", jsonResult)
+	}
 }
 
 func (suite *TestPingtaskItSuite) TestAddPingtaskToAgentForPingtask(c *C) {

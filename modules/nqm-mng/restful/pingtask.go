@@ -94,7 +94,7 @@ func buildQueryForListPingtasks(c *gin.Context) *commonNqmModel.PingtaskQuery {
 
 func getPingtasksById(
 	p *struct {
-		PingtaskID int16 `mvc:"param[pingtask_id]"`
+		PingtaskID int32 `mvc:"param[pingtask_id]"`
 	},
 ) mvc.OutputBody {
 	return mvc.JsonOutputOrNotFound(commonNqmDb.GetPingtaskById(p.PingtaskID))
@@ -114,7 +114,7 @@ func addNewPingtask(
 
 func modifyPingtask(
 	p *struct {
-		ID int16 `mvc:"param[pingtask_id]"`
+		ID int32 `mvc:"param[pingtask_id]"`
 	},
 	pm *commonNqmModel.PingtaskModify,
 ) mvc.OutputBody {
@@ -127,12 +127,12 @@ func addPingtaskToAgentForAgent(c *gin.Context) {
 	 * Builds data from body of request
 	 */
 	var pingtaskIDStr string
-	var pingtaskID int16
+	var pingtaskID int32
 
 	if v, ok := c.GetQuery("pingtask_id"); ok {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -179,11 +179,11 @@ func removePingtaskFromAgentForAgent(c *gin.Context) {
 	}
 
 	var pingtaskIDStr string
-	var pingtaskID int16
+	var pingtaskID int32
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -218,12 +218,12 @@ func addPingtaskToAgentForPingtask(c *gin.Context) {
 	 * Builds data from body of request
 	 */
 	var pingtaskIDStr string
-	var pingtaskID int16
+	var pingtaskID int32
 
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 
@@ -270,11 +270,11 @@ func removePingtaskFromAgentForPingtask(c *gin.Context) {
 	}
 
 	var pingtaskIDStr string
-	var pingtaskID int16
+	var pingtaskID int32
 	if v := c.Param("pingtask_id"); v != "" {
 		pingtaskIDStr = v
 	}
-	if v, err := cast.ToInt16E(pingtaskIDStr); err == nil {
+	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
 

@@ -67,7 +67,7 @@ func (s *TestPingtaskSuite) TearDownSuite(c *C) {
 func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForAgent(c *C) {
 	testCases := []*struct {
 		inputAID      int32
-		inputPID      int16
+		inputPID      int32
 		expectedAgent *nqmModel.Agent
 		expectedErr   error
 	}{
@@ -95,7 +95,7 @@ func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForAgent(c *C) {
 func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForAgent(c *C) {
 	testCases := []*struct {
 		inputAID      int32
-		inputPID      int16
+		inputPID      int32
 		expectedAgent *nqmModel.Agent
 		expectedErr   error
 	}{
@@ -130,7 +130,7 @@ func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForAgent(c *C) {
 
 func (suite *TestPingtaskSuite) TestGetPingtaskById(c *C) {
 	testCases := []*struct {
-		input int16
+		input int32
 	}{
 		{10119}, // NotNil
 		{10120}, // NotNil
@@ -152,7 +152,7 @@ func (suite *TestPingtaskSuite) TestGetPingtaskById(c *C) {
 func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForPingtask(c *C) {
 	testCases := []*struct {
 		inputAID                   int32
-		inputPID                   int16
+		inputPID                   int32
 		expectedNumOfEnabledAgents int8
 		expectedPingtask           *nqmModel.PingtaskView
 		expectedErr                error
@@ -183,7 +183,7 @@ func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForPingtask(c *C) {
 func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForPingtask(c *C) {
 	testCases := []*struct {
 		inputAID                   int32
-		inputPID                   int16
+		inputPID                   int32
 		expectedNumOfEnabledAgents int8
 		expectedPingtask           *nqmModel.PingtaskView
 		expectedErr                error
@@ -315,7 +315,7 @@ func (suite *TestPingtaskSuite) TestAddAndGetPingtask(c *C) {
 	}
 	for i, v := range testCases {
 		actual := AddAndGetPingtask(v.inputPm)
-		c.Logf("case [%d]: %+v\n", i+1, *actual)
+		c.Logf("case [%d]: %+v\n", i+1, actual)
 		c.Assert(actual, NotNil)
 		c.Assert(actual.Period, Equals, int8(15))
 		c.Assert(*actual.Name, Equals, "廣東")
@@ -377,7 +377,7 @@ func (suite *TestPingtaskSuite) TestUpdateAndGetPingtask(c *C) {
 	}
 	for i, v := range testCases {
 		actual := UpdateAndGetPingtask(10120, v.inputPm)
-		c.Logf("case [%d]: %+v\n", i+1, *actual)
+		c.Logf("case [%d]: %+v\n", i+1, actual)
 		c.Assert(actual, NotNil)
 		c.Assert(actual.Period, Equals, int8(15))
 		c.Assert(*actual.Name, Equals, "廣東")

@@ -11,8 +11,8 @@ import (
 )
 
 type AgentPingtask struct {
-	AgentID    int32 `json:"-"`
-	PingtaskID int16 `json:"-"`
+	AgentID    int32
+	PingtaskID int32
 }
 
 type pingtaskFilter struct {
@@ -32,7 +32,7 @@ type pingtaskModifyFilter struct {
 }
 
 type PingtaskView struct {
-	ID                 int16   `gorm:"primary_key:true;column:pt_id" json:"id"`
+	ID                 int32   `gorm:"primary_key:true;column:pt_id" json:"id"`
 	Period             int8    `gorm:"column:pt_period" json:"period"`
 	Name               *string `gorm:"column:pt_name" json:"name"`
 	Enable             bool    `gorm:"column:pt_enable" json:"enable"`
@@ -223,7 +223,7 @@ func (p *PingtaskView) AfterLoad() {
 }
 
 type PingtaskModify struct {
-	Period  int16                `json:"period"`
+	Period  int32                `json:"period"`
 	Name    string               `json:"name" conform:"trim"`
 	Enable  bool                 `json:"enable"`
 	Comment string               `json:"comment" conform:"trim"`

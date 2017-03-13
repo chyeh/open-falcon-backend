@@ -43,7 +43,7 @@ func (agentPingtaskTx *addAgentPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	return commonDb.TxCommit
 }
 
-func AssignPingtaskToAgentForAgent(aID int32, pID int16) (*nqmModel.Agent, error) {
+func AssignPingtaskToAgentForAgent(aID int32, pID int32) (*nqmModel.Agent, error) {
 	txProcessor := &addAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -80,7 +80,7 @@ func (agentPingtaskTx *deleteAgentPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinal
 	return commonDb.TxCommit
 }
 
-func RemovePingtaskFromAgentForAgent(aID int32, pID int16) (*nqmModel.Agent, error) {
+func RemovePingtaskFromAgentForAgent(aID int32, pID int32) (*nqmModel.Agent, error) {
 	txProcessor := &deleteAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -95,7 +95,7 @@ func RemovePingtaskFromAgentForAgent(aID int32, pID int16) (*nqmModel.Agent, err
 	return GetAgentById(aID), nil
 }
 
-func AssignPingtaskToAgentForPingtask(aID int32, pID int16) (*nqmModel.PingtaskView, error) {
+func AssignPingtaskToAgentForPingtask(aID int32, pID int32) (*nqmModel.PingtaskView, error) {
 	txProcessor := &addAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -110,7 +110,7 @@ func AssignPingtaskToAgentForPingtask(aID int32, pID int16) (*nqmModel.PingtaskV
 	return GetPingtaskById(pID), nil
 }
 
-func RemovePingtaskFromAgentForPingtask(aID int32, pID int16) (*nqmModel.PingtaskView, error) {
+func RemovePingtaskFromAgentForPingtask(aID int32, pID int32) (*nqmModel.PingtaskView, error) {
 	txProcessor := &deleteAgentPingtaskTx{
 		agentPingtask: &nqmModel.AgentPingtask{AgentID: aID, PingtaskID: pID},
 	}
@@ -252,7 +252,7 @@ func ListPingtasks(query *nqmModel.PingtaskQuery, paging commonModel.Paging) ([]
 	return result, &paging
 }
 
-func GetPingtaskById(id int16) *nqmModel.PingtaskView {
+func GetPingtaskById(id int32) *nqmModel.PingtaskView {
 	var selectPingtask = DbFacade.GormDb.Model(&nqmModel.PingtaskView{}).
 		Select(`
 			pt_id, pt_period, pt_name, pt_enable, pt_comment,
@@ -325,7 +325,7 @@ func GetPingtaskById(id int16) *nqmModel.PingtaskView {
 
 type addPingtaskTx struct {
 	pingtask   *nqmModel.PingtaskModify
-	pingtaskID int16
+	pingtaskID int32
 	err        error
 }
 
@@ -410,7 +410,7 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	if p.err != nil {
 		return commonDb.TxRollback
 	}
-	p.pingtaskID = int16(pID)
+	p.pingtaskID = int32(pID)
 	return commonDb.TxCommit
 }
 
@@ -457,7 +457,7 @@ func AddAndGetPingtask(pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
 
 type updatePingtaskTx struct {
 	pingtask   *nqmModel.PingtaskModify
-	pingtaskID int16
+	pingtaskID int32
 	err        error
 }
 
@@ -583,7 +583,7 @@ func (u *updatePingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 	return commonDb.TxCommit
 }
 
-func UpdateAndGetPingtask(id int16, pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
+func UpdateAndGetPingtask(id int32, pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
 	txProcessor := &updatePingtaskTx{
 		pingtaskID: id,
 		pingtask:   pm,

@@ -66,18 +66,19 @@ func (s *TestPingtaskSuite) TearDownSuite(c *C) {
 
 func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForAgent(c *C) {
 	testCases := []*struct {
-		inputAID      int32
-		inputPID      int32
-		expectedAgent *nqmModel.Agent
-		expectedErr   error
+		inputAID                      int32
+		inputPID                      int32
+		expectedNumOfEnabledPingtasks int32
+		expectedAgent                 *nqmModel.Agent
+		expectedErr                   error
 	}{
-		{24021, 10119, GetAgentById(24021), nil},
-		{24022, 10119, GetAgentById(24022), nil},
-		{24023, 10120, GetAgentById(24023), nil},
+		{24021, 10119, 1, GetAgentById(24021), nil},
+		{24022, 10119, 1, GetAgentById(24022), nil},
+		{24021, 10120, 2, GetAgentById(24021), nil},
 		// i > 2: cases for panic
-		{24024, 10121, nil, nil},
-		{24025, 10120, nil, nil},
-		{24026, 10121, nil, nil},
+		{24024, 10121, 0, nil, nil},
+		{24025, 10120, 1, nil, nil},
+		{24026, 10121, -1, nil, nil},
 	}
 
 	for i, v := range testCases {
@@ -88,42 +89,51 @@ func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForAgent(c *C) {
 		}
 		actualAgent, actualErr := AssignPingtaskToAgentForAgent(v.inputAID, v.inputPID)
 		c.Assert(actualAgent, NotNil)
+		c.Assert(actualAgent.NumOfEnabledPingtasks, Equals, v.expectedNumOfEnabledPingtasks)
 		c.Assert(actualErr, IsNil)
 	}
 }
 
 func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForAgent(c *C) {
 	testCases := []*struct {
-		inputAID      int32
-		inputPID      int32
-		expectedAgent *nqmModel.Agent
-		expectedErr   error
+		inputAID                      int32
+		inputPID                      int32
+		expectedNumOfEnabledPingtasks int32
+		expectedAgent                 *nqmModel.Agent
+		expectedErr                   error
 	}{
-		{24021, 10119, GetAgentById(24021), nil},
-		{24022, 10119, GetAgentById(24022), nil},
-		{24023, 10120, GetAgentById(24023), nil},
-		// i > 2: Not deleting
-		{24024, 10121, GetAgentById(24024), nil},
-		{24025, 10120, nil, nil},
-		{24026, 10121, nil, nil},
+		{24021, 10119, 1, GetAgentById(24021), nil},
+		{24022, 10119, 0, GetAgentById(24022), nil},
+		{24021, 10120, 0, GetAgentById(24021), nil},
+		{24024, 10121, 0, GetAgentById(24024), nil},
+		// i > 3: Not deleting
+		{24025, 10120, -1, nil, nil},
+		{24026, 10121, -1, nil, nil},
 	}
 
 	for i, v := range testCases {
 		c.Logf("case[%d]\n%+v\n", i, *v)
-		if i == 3 {
-			actualAgent, actualErr := RemovePingtaskFromAgentForAgent(v.inputAID, v.inputPID)
-			c.Assert(actualAgent, NotNil)
-			c.Assert(actualErr, IsNil)
-			continue
-		}
 		if i > 3 {
 			actualAgent, _ := RemovePingtaskFromAgentForAgent(v.inputAID, v.inputPID)
 			c.Assert(actualAgent, IsNil)
 			continue
 		}
+		if i == 3 {
+			actualAgent, actualErr := RemovePingtaskFromAgentForAgent(v.inputAID, v.inputPID)
+			c.Assert(actualAgent, NotNil)
+			c.Assert(actualAgent.NumOfEnabledPingtasks, Equals, v.expectedNumOfEnabledPingtasks)
+			c.Assert(actualErr, IsNil)
+			continue
+		}
 		AssignPingtaskToAgentForAgent(v.inputAID, v.inputPID)
+	}
+	for i, v := range testCases {
+		if i > 2 {
+			break
+		}
 		actualAgent, actualErr := RemovePingtaskFromAgentForAgent(v.inputAID, v.inputPID)
 		c.Assert(actualAgent, NotNil)
+		c.Assert(actualAgent.NumOfEnabledPingtasks, Equals, v.expectedNumOfEnabledPingtasks)
 		c.Assert(actualErr, IsNil)
 	}
 }
@@ -175,6 +185,7 @@ func (suite *TestPingtaskSuite) TestAssignPingtaskToAgentForPingtask(c *C) {
 			continue
 		}
 		actualPingtask, actualErr := AssignPingtaskToAgentForPingtask(v.inputAID, v.inputPID)
+		c.Assert(actualPingtask, NotNil)
 		c.Assert(actualPingtask.NumOfEnabledAgents, Equals, v.expectedNumOfEnabledAgents)
 		c.Assert(actualErr, IsNil)
 	}
@@ -192,7 +203,7 @@ func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForPingtask(c *C) {
 		{24022, 10119, 0, GetPingtaskById(10119), nil},
 		{24023, 10120, 0, GetPingtaskById(10120), nil},
 		// i > 2: Not deleting
-		{24024, 10121, -1, GetPingtaskById(10121), nil},
+		{24024, 10121, -1, nil, nil},
 		{24025, 10120, 1, nil, nil},
 		{24026, 10121, -1, nil, nil},
 	}
@@ -207,6 +218,7 @@ func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForPingtask(c *C) {
 		if i == 4 {
 			actualPingtask, actualErr := RemovePingtaskFromAgentForPingtask(v.inputAID, v.inputPID)
 			c.Assert(actualPingtask, NotNil)
+			c.Assert(actualPingtask.NumOfEnabledAgents, Equals, v.expectedNumOfEnabledAgents)
 			c.Assert(actualErr, IsNil)
 			continue
 		}
@@ -217,6 +229,7 @@ func (suite *TestPingtaskSuite) TestRemovePingtaskFromAgentForPingtask(c *C) {
 			break
 		}
 		actualPingtask, actualErr := RemovePingtaskFromAgentForPingtask(v.inputAID, v.inputPID)
+		c.Assert(actualPingtask, NotNil)
 		c.Assert(actualPingtask.NumOfEnabledAgents, Equals, v.expectedNumOfEnabledAgents)
 		c.Assert(actualErr, IsNil)
 	}

@@ -109,7 +109,7 @@ func addNewPingtask(
 	pm *commonNqmModel.PingtaskModify,
 ) mvc.OutputBody {
 	pingtask := commonNqmDb.AddAndGetPingtask(pm)
-	return mvc.JsonOutputBody(pingtask)
+	return mvc.JsonOutputBody2(http.StatusCreated, pingtask)
 }
 
 func modifyPingtask(

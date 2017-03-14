@@ -10,7 +10,7 @@ type TestPingtaskSuite struct{}
 
 var _ = Suite(&TestPingtaskSuite{})
 
-// Tests validation of NQM agent
+// Tests validation of pingtasks
 func (suite *TestPingtaskSuite) TestPingtaskModify(c *C) {
 	testCase := &PingtaskModify{
 		Name:    " 台灣 ",

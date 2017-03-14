@@ -33,22 +33,6 @@ func listPingtasks(c *gin.Context) {
 	c.JSON(http.StatusOK, pingtasks)
 }
 
-//func listPingtasks(
-//	p *struct {
-//		Period             string        `mvc:"query[period]"`
-//		Name               string        `mvc:"query[name]"`
-//		Enable             string        `mvc:"query[enable]"`
-//		Comment            string        `mvc:"query[comment]"`
-//		NumOfEnabledAgents string        `mvc:"query[num_of_enabled_agents]"`
-//		Paging             *model.Paging `mvc:"pageSize[50] pageOrderBy[period#asc:name#asc:enable#desc:comment#asc:num_of_enabled_agents#desc]"`
-//	},
-//) (*model.Paging, mvc.OutputBody) {
-//	return p.Paging,
-//		mvc.JsonOutputBody(
-//			commonNqmDb.ListPingtasks(p.Name, p.Paging),
-//		)
-//}
-
 func buildQueryForListPingtasks(c *gin.Context) *commonNqmModel.PingtaskQuery {
 	query := &commonNqmModel.PingtaskQuery{}
 
@@ -71,27 +55,6 @@ func buildQueryForListPingtasks(c *gin.Context) *commonNqmModel.PingtaskQuery {
 	return query
 }
 
-//func getPingtasksById(c *gin.Context) {
-//pingtaskId, err := strconv.Atoi(c.Param("pingtask_id"))
-//if err != nil {
-//	commonGin.OutputJsonIfNotNil(c, nil)
-//}
-
-//var pingtaskIDStr string
-//var pingtaskID int32
-//if v := c.Param("pingtask_id"); v != "" {
-//	pingtaskIDStr = v
-//}
-//if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
-//	pingtaskID = v
-//}
-
-//pingtask := commonNqmDb.GetPingtaskById(pingtaskID)
-
-//commonGin.OutputJsonIfNotNil(c, pingtask)
-//c.JSON(http.StatusOK, "")
-//}
-
 func getPingtasksById(
 	p *struct {
 		PingtaskID int32 `mvc:"param[pingtask_id]"`
@@ -99,11 +62,6 @@ func getPingtasksById(
 ) mvc.OutputBody {
 	return mvc.JsonOutputOrNotFound(commonNqmDb.GetPingtaskById(p.PingtaskID))
 }
-
-//func addNewPingtask(c *gin.Context) {
-//	fmt.Println(c.Value("period"))
-//	c.JSON(http.StatusCreated, "fuck")
-//}
 
 func addNewPingtask(
 	pm *commonNqmModel.PingtaskModify,
@@ -145,8 +103,6 @@ func addPingtaskToAgentForAgent(c *gin.Context) {
 		agentID = v
 	}
 
-	/* 待做: 驗證 input 範圍*/
-
 	agentWithNewPingtask, err := commonNqmDb.AssignPingtaskToAgentForAgent(agentID, pingtaskID)
 	if err != nil {
 		switch err.(type) {
@@ -186,8 +142,6 @@ func removePingtaskFromAgentForAgent(c *gin.Context) {
 	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
-
-	/* 待做: 驗證 input 範圍*/
 
 	agentWithRemovedPingtask, err := commonNqmDb.RemovePingtaskFromAgentForAgent(agentID, pingtaskID)
 	if err != nil {
@@ -236,8 +190,6 @@ func addPingtaskToAgentForPingtask(c *gin.Context) {
 		agentID = v
 	}
 
-	/* 待做: 驗證 input 範圍*/
-
 	agentWithNewPingtask, err := commonNqmDb.AssignPingtaskToAgentForPingtask(agentID, pingtaskID)
 	if err != nil {
 		switch err.(type) {
@@ -277,8 +229,6 @@ func removePingtaskFromAgentForPingtask(c *gin.Context) {
 	if v, err := cast.ToInt32E(pingtaskIDStr); err == nil {
 		pingtaskID = v
 	}
-
-	/* 待做: 驗證 input 範圍*/
 
 	agentWithRemovedPingtask, err := commonNqmDb.RemovePingtaskFromAgentForPingtask(agentID, pingtaskID)
 	if err != nil {

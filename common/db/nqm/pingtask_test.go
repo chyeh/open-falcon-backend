@@ -286,7 +286,6 @@ func (suite *TestPingtaskSuite) TestListPingtasks(c *C) {
 			commonModel.Paging{Size: 2, Position: 1, OrderBy: []*commonModel.OrderByEntity{}},
 			2, 2,
 		},
-		//	{	// num_of_enabled_agents }
 	}
 
 	for i, v := range testCases {

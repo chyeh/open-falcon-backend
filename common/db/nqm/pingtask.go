@@ -30,16 +30,10 @@ func (agentPingtaskTx *addAgentPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 		agentPingtaskTx.agentPingtask.AgentID,
 		agentPingtaskTx.agentPingtask.PingtaskID,
 	)
-	//agentPingtaskTx.agentPingtask.AgentID = owlDb.BuildAndGetNameTagId(
-	//	tx, agentPingtaskTx.agent.NameTagValue,
-	//)
-
-	//agentPingtaskTx.addAgent(tx)
 	if agentPingtaskTx.err != nil {
 		return commonDb.TxRollback
 	}
 
-	//agentPingtaskTx.prepareGroupTags(tx)
 	return commonDb.TxCommit
 }
 
@@ -136,10 +130,6 @@ var orderByDialectForPingtasks = commonModel.NewSqlOrderByDialect(
 )
 
 func buildSortingClauseOfPingtasks(paging *commonModel.Paging) string {
-	//if len(paging.OrderBy) == 0 {
-	//	paging.OrderBy = append(paging.OrderBy, &commonModel.OrderByEntity{"num_of_enabled_agents", commonModel.Descending})
-	//}
-
 	querySyntax, err := orderByDialectForPingtasks.ToQuerySyntax(paging.OrderBy)
 	gormExt.DefaultGormErrorConverter.PanicIfError(err)
 
@@ -415,33 +405,6 @@ func (p *addPingtaskTx) InTx(tx *sqlx.Tx) commonDb.TxFinale {
 }
 
 func AddAndGetPingtask(pm *nqmModel.PingtaskModify) *nqmModel.PingtaskView {
-	//if valueOfNameTag == "" {
-	//	return -1
-	//}
-
-	//tx.MustExec(
-	//	`
-	//	INSERT INTO owl_name_tag(nt_value)
-	//	SELECT ?
-	//	FROM DUAL
-	//	WHERE NOT EXISTS (
-	//		SELECT *
-	//		FROM owl_name_tag
-	//		WHERE nt_value = ?
-	//	)
-	//	`,
-	//	valueOfNameTag, valueOfNameTag,
-	//)
-
-	//var nameTagId int16
-	//sqlxExt.ToTxExt(tx).Get(
-	//	&nameTagId,
-	//	`
-	//	SELECT nt_id FROM owl_name_tag
-	//	WHERE nt_value = ?
-	//	`,
-	//	valueOfNameTag,
-	//)
 	txProcessor := &addPingtaskTx{
 		pingtask: pm,
 	}

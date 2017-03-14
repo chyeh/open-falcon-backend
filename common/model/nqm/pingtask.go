@@ -41,23 +41,18 @@ type PingtaskView struct {
 
 	IdsOfIspFilters  string `gorm:"column:pt_isp_filter_ids" json:"-"`
 	NamesOfIspFilter string `gorm:"column:pt_isp_filter_names" json:"-"`
-	//IspFilters       []*commonOwlModel.IspOfPingtaskView
 
 	IdsOfProvinceFilters  string `gorm:"column:pt_province_filter_ids" json:"-"`
 	NamesOfProvinceFilter string `gorm:"column:pt_province_filter_names" json:"-"`
-	//ProvinceFilters       []*commonOwlModel.ProvinceOfPingtaskView
 
 	IdsOfCityFilters  string `gorm:"column:pt_city_filter_ids" json:"-"`
 	NamesOfCityFilter string `gorm:"column:pt_city_filter_names" json:"-"`
-	//CityFilters              []*commonOwlModel.CityOfPingtaskView
 
 	IdsOfNameTagFilters  string `gorm:"column:pt_name_tag_filter_ids" json:"-"`
 	NamesOfNameTagFilter string `gorm:"column:pt_name_tag_filter_values" json:"-"`
-	//NameTagFilters       []*commonOwlModel.NameTagOfPingtaskView
 
 	IdsOfGroupTagFilters  string `gorm:"column:pt_group_tag_filter_ids" json:"-"`
 	NamesOfGroupTagFilter string `gorm:"column:pt_group_tag_filter_names" json:"-"`
-	//GroupTagFilters       []*commonOwlModel.GroupTagOfPingtaskView
 
 	Filter pingtaskFilter `json:"filter"`
 }
@@ -65,47 +60,6 @@ type PingtaskView struct {
 func (PingtaskView) TableName() string {
 	return "nqm_ping_task"
 }
-
-//func (p *PingtaskView) MarshalJSON() ([]byte, error) {
-//	jsonObject := json.New()
-//
-//	jsonObject.Set("id", p.ID)
-//	jsonObject.Set("period", p.Period)
-//	jsonObject.Set("name", p.Name)
-//	jsonObject.Set("enable", p.Enable)
-//	jsonObject.Set("comment", p.Comment)
-//	jsonObject.Set("num_of_enabled_agents", p.NumOfEnabledAgents)
-//
-//	jsonFilter := json.New()
-//	jsonObject.Set("filter", jsonFilter)
-//
-//	jsonIsp := json.New()
-//	jsonIsp.Set("id", p.Filter.IspFilters.I.Id)
-//	jsonIsp.Set("name", p.Filter.IspFilters.Name)
-//	jsonObject.Set("isp", jsonIsp)
-//
-//	jsonProvince := json.New()
-//	jsonProvince.Set("id", p.ProvinceId)
-//	jsonProvince.Set("name", p.ProvinceName)
-//	jsonObject.Set("province", jsonProvince)
-//
-//	jsonCity := json.New()
-//	jsonCity.Set("id", p.CityId)
-//	jsonCity.Set("name", p.CityName)
-//	jsonObject.Set("city", jsonCity)
-//
-//	jsonNameTag := json.New()
-//	jsonNameTag.Set("id", p.NameTagId)
-//	jsonNameTag.Set("value", p.NameTagValue)
-//	jsonObject.Set("name_tag", jsonNameTag)
-//
-//	jsonGroupTags := json.New()
-//	jsonNameTag.Set("id", p.NameTagId)
-//	jsonNameTag.Set("value", p.NameTagValue)
-//	jsonObject.Set("name_tag", jsonNameTag)
-//
-//	return jsonObject.MarshalJSON()
-//}
 
 func (p *PingtaskView) AfterLoad() {
 
@@ -116,10 +70,7 @@ func (p *PingtaskView) AfterLoad() {
 	p.Filter.CityFilters = make([]*commonOwlModel.CityOfPingtaskView, 0)
 	p.Filter.NameTagFilters = make([]*commonOwlModel.NameTagOfPingtaskView, 0)
 	p.Filter.GroupTagFilters = make([]*commonOwlModel.GroupTagOfPingtaskView, 0)
-	//p.IspFilters = owlModel.SplitToArrayOfGroupTags(
-	//	p.IdsOfIspFilters, ",",
-	//	p.NamesOfIspFilter, "\000",
-	//)
+
 	if p.IdsOfIspFilters != "" {
 		ids = strings.Split(p.IdsOfIspFilters, ",")
 		names = strings.Split(p.NamesOfIspFilter, "\000")
@@ -137,10 +88,6 @@ func (p *PingtaskView) AfterLoad() {
 		}
 	}
 
-	//p.ProvinceFilters = owlModel.SplitToArrayOfGroupTags(
-	//	p.IdsOfProvinceFilters, ",",
-	//	p.NamesOfProvinceFilter, "\000",
-	//)
 	if p.IdsOfProvinceFilters != "" {
 		ids = strings.Split(p.IdsOfProvinceFilters, ",")
 		names = strings.Split(p.NamesOfProvinceFilter, "\000")
@@ -158,10 +105,6 @@ func (p *PingtaskView) AfterLoad() {
 		}
 	}
 
-	//p.CityFilters = owlModel.SplitToArrayOfGroupTags(
-	//	p.IdsOfCityFilters, ",",
-	//	p.ProvinceIdsOfCityFilters, "\000",
-	//)
 	if p.IdsOfCityFilters != "" {
 		ids = strings.Split(p.IdsOfCityFilters, ",")
 		names = strings.Split(p.NamesOfCityFilter, "\000")
@@ -179,10 +122,6 @@ func (p *PingtaskView) AfterLoad() {
 		}
 	}
 
-	//p.NameTagFilters = owlModel.SplitToArrayOfGroupTags(
-	//	p.IdsOfNameTagFilters, ",",
-	//	p.NamesOfNameTagFilter, "\000",
-	//)
 	if p.IdsOfNameTagFilters != "" {
 		ids = strings.Split(p.IdsOfNameTagFilters, ",")
 		values := strings.Split(p.NamesOfNameTagFilter, "\000")
@@ -200,10 +139,6 @@ func (p *PingtaskView) AfterLoad() {
 		}
 	}
 
-	//p.GroupTagFilters = owlModel.SplitToArrayOfGroupTags(
-	//	p.IdsOfGroupTagFilters, ",",
-	//	p.NamesOfGroupTagFilter, "\000",
-	//)
 	if p.IdsOfGroupTagFilters != "" {
 		ids = strings.Split(p.IdsOfGroupTagFilters, ",")
 		names = strings.Split(p.NamesOfGroupTagFilter, "\000")
